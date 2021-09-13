@@ -34,6 +34,35 @@ namespace lux
         {
             return this->resource.amount > 0;
         }
+
+        bool hasWood()
+        {
+            if (hasResource() && resource.type == wood)
+            {
+                return true;
+            }
+            else false;
+        }
+
+        bool hasCoal()
+        {
+            if (hasResource() && resource.type == coal)
+            {
+                return true;
+            }
+            else false;
+        }
+
+        bool hasUranium()
+        {
+            if (hasResource() && resource.type == uranium)
+            {
+                return true;
+            }
+            else false;
+        }
+
+
     };
     class GameMap
     {
