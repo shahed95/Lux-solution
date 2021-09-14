@@ -23,7 +23,7 @@ namespace lux
     public:
         Position pos = Position(-1, -1);
         Resource resource;
-        lux::CityTile * citytile;
+        lux::CityTile *citytile;
         float road = 0.0;
         Cell(){};
         Cell(int x, int y)
@@ -35,34 +35,15 @@ namespace lux
             return this->resource.amount > 0;
         }
 
-        bool hasWood()
+        char getResourceType()
         {
-            if (hasResource() && resource.type == wood)
-            {
-                return true;
-            }
-            else false;
+            if (resource.type == wood)
+                return 'w';
+            if (resource.type == coal)
+                return 'c';
+            if (resource.type == uranium)
+                return 'u';
         }
-
-        bool hasCoal()
-        {
-            if (hasResource() && resource.type == coal)
-            {
-                return true;
-            }
-            else false;
-        }
-
-        bool hasUranium()
-        {
-            if (hasResource() && resource.type == uranium)
-            {
-                return true;
-            }
-            else false;
-        }
-
-
     };
     class GameMap
     {

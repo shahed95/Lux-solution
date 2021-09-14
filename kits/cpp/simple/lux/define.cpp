@@ -1,3 +1,5 @@
+#ifndef DEFINE
+#define DEFINE
 #include "kit.hpp"
 #include <map>
 #include <string>
@@ -23,3 +25,4 @@ namespace lux
 		return out;
 	};
 }
+#endif
