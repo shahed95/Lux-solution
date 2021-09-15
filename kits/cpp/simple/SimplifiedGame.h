@@ -28,15 +28,19 @@ public:
 
     bool isInside(int x, int y);
 
-    bool isClosedtoCity(int x, int y, int withinDistance);
+    int closeCityCount(int x, int y, int withinDistance);
 
     char getCellType(int x, int y);
 
     vector<vector<int>> bfsOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos);
 
     vector<pair<int,int> > getAllposition(string type);
+    vector<pair<int,int> > getAllposition(string type, int mod, int select);
+    vector<pair<int, int>> getAllResourcePosition(int researchPoint);
 
     vector<vector<char>> createEmptyMap(int height, int width);
+
+
 };
 
 #endif

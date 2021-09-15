@@ -144,25 +144,49 @@ vector<pair<int, int>> SimplifiedGame::getAllposition(string types)
     return v;
 }
 
-bool SimplifiedGame::isClosedtoCity(int x, int y, int withinDistance)
+int SimplifiedGame::closeCityCount(int x, int y, int withinDistance)
 {
     if (!isInside(x, y))
-        return false;
+        return 0;
 
-    for (int d = 1; d <= withinDistance; d++)
+    int ret = 0;
+    for (int d = 0; d <= withinDistance; d++)
     {
         for (int dx = 0; dx <= d; dx++)
         {
             int dy = d - dx;
-            if (getCellType(x + dy, y + dx) == 'y')
-                return true;
-            if (getCellType(x + dy, y - dx) == 'y')
-                return true;
-            if (getCellType(x - dy, y + dx) == 'y')
-                return true;
-            if (getCellType(x - dy, y - dx) == 'y')
-                return true;
+            if (getCellType(x + dx, y + dy) == 'y')
+                ret++;
+            if (dy != 0 && getCellType(x + dx, y - dy) == 'y')
+                ret++;
+            if (dx != 0 && getCellType(x - dx, y + dy) == 'y')
+                ret++;
+            if (dx != 0 && dy != 0 && getCellType(x - dx, y - dy) == 'y')
+                ret++;
         }
     }
-    return false;
+    return ret;
+}
+
+vector<pair<int, int>> SimplifiedGame::getAllResourcePosition(int researchPoint)
+{
+    string resourceString = "w";
+    if (researchPoint >= 50)
+        resourceString += "c";
+    if (researchPoint >= 200)
+        resourceString += "u";
+
+    vector<pair<int, int>> v;
+
+    for (int i = 0; i < sMap.size(); i++)
+    {
+        for (int j = 0; j < sMap[i].size(); j++)
+        {
+            if (resourceString.find(sMap[i][j].first) != std::string::npos && closeCityCount(i,j,1)==0)
+            {
+                v.push_back({i, j});
+            }
+        }
+    }
+    return v;
 }

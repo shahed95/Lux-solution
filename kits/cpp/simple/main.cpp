@@ -21,6 +21,33 @@ const int DX[] = {0, 0, 0, -1, 1};
 const int DY[] = {0, 1, -1, 0, 0};
 const DIRECTIONS D[] = {CENTER, SOUTH, NORTH, WEST, EAST};
 
+string unitAction(Unit unit, vector<vector<int>> &distArray, vector<vector<char>> &visit, SimplifiedGame &sGame)
+{
+    int closestDist = 999999;
+    DIRECTIONS closestDirection;
+    int closestX, closestY;
+    for (int i = 0; i < 5; i++)
+    {
+        int goX = unit.pos.x + DX[i];
+        int goY = unit.pos.y + DY[i];
+        if (sGame.isInside(goX, goY) && visit[goX][goY] == '.')
+        {
+            if (distArray[goX][goY] < closestDist)
+            {
+                closestDist = distArray[goX][goY];
+                closestDirection = D[i];
+                closestX = goX;
+                closestY = goY;
+            }
+        }
+    }
+
+    if (sGame.getCellType(closestX, closestY) != 'y')
+        visit[closestX][closestY] = 'x';
+
+    return unit.move(closestDirection);
+}
+
 int main()
 {
     kit::Agent gameState = kit::Agent();
@@ -77,19 +104,15 @@ int main()
         // y = my city tiles, z = opponent city tiles
 
         auto distfromCities = sGame.bfsOnMap(sGame.getAllposition("y"), sGame.getAllposition("z"));
-        auto distfromResource = sGame.bfsOnMap(sGame.getAllposition("w"), sGame.getAllposition("zcu"));
         auto distfromDots = sGame.bfsOnMap(sGame.getAllposition("."), sGame.getAllposition("yz"));
 
-        if (player.researchPoints >= 50)
-        {
-            distfromResource = sGame.bfsOnMap(sGame.getAllposition("wc"), sGame.getAllposition("zu"));
-        }
-        if (player.researchPoints >= 200)
-        {
-            distfromResource = sGame.bfsOnMap(sGame.getAllposition("wcu"), sGame.getAllposition("z"));
-        }
+        
 
-        set<pair<int, int>> taken;
+        // make many dist resource
+
+        auto distfromResource = sGame.bfsOnMap(sGame.getAllResourcePosition(player.researchPoints), sGame.getAllposition("zwcu"));
+
+        vector<vector<char>> visit = sGame.createEmptyMap(gameMap.height, gameMap.width);
 
         for (int i = 0; i < player.units.size(); i++)
         {
@@ -98,15 +121,11 @@ int main()
             if (!unit.canAct())
                 continue;
 
-            int closestDist = 999999;
-            DIRECTIONS closestDirection;
-            int closestX, closestY;
-
             auto &distArray = distfromResource;
 
-            if (unit.getCargoSpaceLeft() == 0) // has enough
+            if (unit.getCargoSpaceLeft() == 0)
             {
-                if (i % 2 == 0)
+                if (unit.favoriteNumber % 2 == 0)
                 {
                     if (unit.canBuild(gameMap))
                     {
@@ -114,41 +133,17 @@ int main()
                         continue;
                     }
                     else
-                    {
                         distArray = distfromDots;
-                    }
                 }
                 else
-                {
                     distArray = distfromCities;
-                }
             }
-            else if ((gameState.turn % 40 + 5) >= 30 && distfromCities.size() != 0)
+            else if ((gameState.turn % 40 + 5) >= 30 && sGame.closeCityCount(unit.pos.x, unit.pos.y, 5))
             {
                 distArray = distfromCities;
             }
 
-            for (int i = 0; i < 5; i++)
-            {
-                int goX = unit.pos.x + DX[i];
-                int goY = unit.pos.y + DY[i];
-                if (sGame.isInside(goX, goY) && taken.count({goX, goY}) == 0)
-                {
-                    if (distArray[goX][goY] < closestDist)
-                    {
-                        closestDist = distArray[goX][goY];
-                        closestDirection = D[i];
-                        closestX = goX;
-                        closestY = goY;
-                    }
-                }
-            }
-
-            actions.push_back(unit.move(closestDirection));
-            if (sGame.getCellType(closestX, closestY) != 'y')
-            {
-                taken.insert({closestX, closestY});
-            }
+            actions.push_back(unitAction(unit, distArray, visit, sGame));
         }
 
         // -------------------------------------------------------------------------------------------------------//

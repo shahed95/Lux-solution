@@ -24,6 +24,7 @@ namespace lux
         int type;
         int cooldown;
         Cargo cargo;
+        int favoriteNumber;
         Unit(){};
         Unit(int teamid, int type, const string &unitid, int x, int y, int cooldown, int wood, int coal, int uranium)
         {
@@ -35,6 +36,7 @@ namespace lux
             this->cargo.wood = wood;
             this->cargo.coal = coal;
             this->cargo.uranium = uranium;
+            this->favoriteNumber = rand();
         };
         bool isWorker() const
         {
