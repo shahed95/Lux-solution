@@ -17,6 +17,10 @@ using namespace lux;
  4. try to find the best combination of strategies
 ----------------------------------------------------*/
 
+const int DX[] = {0, 0, 0, -1, 1};
+const int DY[] = {0, 1, -1, 0, 0};
+const DIRECTIONS D[] = {CENTER, SOUTH, NORTH, WEST, EAST};
+
 int main()
 {
     kit::Agent gameState = kit::Agent();
@@ -71,60 +75,79 @@ int main()
         //
 
         // y = my city tiles, z = opponent city tiles
-        auto distfromCities = sGame.bfsOnMap(sGame.getAllposition("y"), sGame.getAllposition("z"));
-        auto distfromWoods = sGame.bfsOnMap(sGame.getAllposition("w"), sGame.getAllposition("zcu"));
-        auto distfromDots = sGame.bfsOnMap(sGame.getAllposition("."), sGame.getAllposition("yzwcu"));
 
-        auto dummyMap = sGame.createEmptyMap(gameMap.height, gameMap.width);
+        auto distfromCities = sGame.bfsOnMap(sGame.getAllposition("y"), sGame.getAllposition("z"));
+        auto distfromResource = sGame.bfsOnMap(sGame.getAllposition("w"), sGame.getAllposition("zcu"));
+        auto distfromDots = sGame.bfsOnMap(sGame.getAllposition("."), sGame.getAllposition("yz"));
+
+        if (player.researchPoints >= 50)
+        {
+            distfromResource = sGame.bfsOnMap(sGame.getAllposition("wc"), sGame.getAllposition("zu"));
+        }
+        if (player.researchPoints >= 200)
+        {
+            distfromResource = sGame.bfsOnMap(sGame.getAllposition("wcu"), sGame.getAllposition("z"));
+        }
+
+        set<pair<int, int>> taken;
 
         for (int i = 0; i < player.units.size(); i++)
         {
             Unit unit = player.units[i];
-            int ux = unit.pos.x;
-            int uy = unit.pos.y;
 
-            if (unit.isWorker() && unit.canAct())
+            if (!unit.canAct())
+                continue;
+
+            int closestDist = 999999;
+            DIRECTIONS closestDirection;
+            int closestX, closestY;
+
+            auto &distArray = distfromResource;
+
+            if (unit.getCargoSpaceLeft() == 0) // has enough
             {
-                auto &distarray = distfromCities;
-
-                if (unit.canBuild(gameMap) && i % 2 == 0)
+                if (i % 2 == 0)
                 {
-                    actions.push_back(unit.buildCity());
-                }
-                else if (unit.getCargoSpaceLeft() > 0)
-                {
-                    distarray = distfromWoods;
+                    if (unit.canBuild(gameMap))
+                    {
+                        actions.push_back(unit.buildCity());
+                        continue;
+                    }
+                    else
+                    {
+                        distArray = distfromDots;
+                    }
                 }
                 else
                 {
-                    if(i % 2 == 0) distarray = distfromDots;
+                    distArray = distfromCities;
                 }
+            }
+            else if ((gameState.turn % 40 + 5) >= 30 && distfromCities.size() != 0)
+            {
+                distArray = distfromCities;
+            }
 
-                map<int, DIRECTIONS> mp;
+            for (int i = 0; i < 5; i++)
+            {
+                int goX = unit.pos.x + DX[i];
+                int goY = unit.pos.y + DY[i];
+                if (sGame.isInside(goX, goY) && taken.count({goX, goY}) == 0)
+                {
+                    if (distArray[goX][goY] < closestDist)
+                    {
+                        closestDist = distArray[goX][goY];
+                        closestDirection = D[i];
+                        closestX = goX;
+                        closestY = goY;
+                    }
+                }
+            }
 
-                mp[distarray[ux][uy]] = CENTER;
-
-                if (dummyMap[ux - 1][uy] != 'p')
-                {
-                    mp[distarray[ux - 1][uy]] = WEST;
-                }
-                if (dummyMap[ux + 1][uy] != 'p')
-                {
-                    mp[distarray[ux + 1][uy]] = EAST;
-                }
-                if (dummyMap[ux][uy + 1] != 'p')
-                {
-                    mp[distarray[ux][uy + 1]] = SOUTH;
-                }
-                if (dummyMap[ux][uy - 1] != 'p')
-                {
-                    mp[distarray[ux][uy - 1]] = NORTH;
-                }
-
-                DIRECTIONS bestDirection = mp.begin()->second;
-                actions.push_back(unit.move(bestDirection));
-                unit.pos.translate(bestDirection, 1);
-                dummyMap[unit.pos.x][unit.pos.y] = 'p';
+            actions.push_back(unit.move(closestDirection));
+            if (sGame.getCellType(closestX, closestY) != 'y')
+            {
+                taken.insert({closestX, closestY});
             }
         }
 
