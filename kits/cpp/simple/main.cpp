@@ -9,6 +9,13 @@
 using namespace std;
 using namespace lux;
 
+/*---------------------------------------------------
+ Plan:
+ 1. Devide into smaller subproblems
+ 2. write different Strageties for each subproblem
+ 3. apply strategy based on the situation
+ 4. try to find the best combination of strategies
+----------------------------------------------------*/
 
 int main()
 {
@@ -18,6 +25,7 @@ int main()
 
     while (true)
     {
+
         /** Do not edit! **/
         // wait for updates
         gameState.update();
@@ -31,39 +39,21 @@ int main()
         GameMap &gameMap = gameState.map;
 
         SimplifiedGame sGame = SimplifiedGame(gameMap, player, opponent);
-        vector<vector<pair<char, int>>> sMap = sGame.simpleMap;
 
-        vector<Cell *> resourceTiles = vector<Cell *>();
-        vector<Cell *> freeTiles = vector<Cell *>();
+        //-------------------------------------------------------------------------------------------------------//
+        // city Action AI
+        //-------------------------------------------------------------------------------------------------------//
 
-        for (int i = 0; i < sMap.size(); i++)
-        {
-            for (int j = 0; j < sMap[i].size(); j++)
-            {
-                if (sMap[i][j].first == 'w')
-                {
-                    resourceTiles.push_back(gameMap.getCell(i, j));
-                }
-                else
-                {
-                    freeTiles.push_back(gameMap.getCell(i, j));
-                }
-            }
-        }
+        int unitBuilable = player.cityTileCount - player.units.size();
 
-        // we iterate over all cities
-
-        int need_unit = player.cityTileCount - player.units.size();
-        set<pair<int, int>> citytilesPos;
         for (auto city : player.cities)
         {
             for (auto citytiles : city.second.citytiles)
             {
-                citytilesPos.insert({citytiles.pos.x, citytiles.pos.y});
-                if (citytiles.canAct() && need_unit > 0)
+                if (citytiles.canAct() && unitBuilable > 0)
                 {
                     actions.push_back(citytiles.buildWorker());
-                    need_unit--;
+                    unitBuilable--;
                 }
                 else if (citytiles.canAct())
                 {
@@ -72,223 +62,73 @@ int main()
             }
         }
 
-        // we iterate over all our units and do something with them
-        set<pair<int, int>> taken;
+        //-------------------------------------------------------------------------------------------------------//
+        // player Action AI
+        //-------------------------------------------------------------------------------------------------------//
+
+        // which direction each worker should move ?
+        // if it's mining resources (not adjacent to city) do not move
+        //
+
+        // y = my city tiles, z = opponent city tiles
+        auto distfromCities = sGame.bfsOnMap(sGame.getAllposition("y"), sGame.getAllposition("z"));
+        auto distfromWoods = sGame.bfsOnMap(sGame.getAllposition("w"), sGame.getAllposition("zcu"));
+        auto distfromDots = sGame.bfsOnMap(sGame.getAllposition("."), sGame.getAllposition("yzwcu"));
+
+        auto dummyMap = sGame.createEmptyMap(gameMap.height, gameMap.width);
 
         for (int i = 0; i < player.units.size(); i++)
         {
             Unit unit = player.units[i];
+            int ux = unit.pos.x;
+            int uy = unit.pos.y;
+
             if (unit.isWorker() && unit.canAct())
             {
-                if (unit.getCargoSpaceLeft() > 0)
+                auto &distarray = distfromCities;
+
+                if (unit.canBuild(gameMap) && i % 2 == 0)
                 {
-                    // if the unit is a worker and we have space in cargo, lets find the nearest resource tile and try to mine it
-                    Cell *closestResourceTile;
-                    float closestDist = 9999999;
-                    for (auto it = resourceTiles.begin(); it != resourceTiles.end(); it++)
-                    {
-                        auto cell = *it;
-                        if (cell->resource.type == ResourceType::coal && !player.researchedCoal())
-                            continue;
-                        if (cell->resource.type == ResourceType::uranium && !player.researchedUranium())
-                            continue;
-                        float dist = cell->pos.distanceTo(unit.pos);
-
-                        if (dist < closestDist)
-                        {
-                            closestDist = dist;
-                            closestResourceTile = cell;
-                        }
-                    }
-
-                    if (closestResourceTile != nullptr)
-                    {
-                        auto dir = unit.pos.directionTo(closestResourceTile->pos);
-                        int posx = unit.pos.x;
-                        int posy = unit.pos.y;
-                        if (dir == NORTH)
-                        {
-                            posy--;
-                            if (taken.count({posx, posy}))
-                            {
-                                posy++;
-                                dir = EAST;
-                            }
-                        }
-                        if (dir == EAST)
-                        {
-                            posx++;
-                            if (taken.count({posx, posy}))
-                            {
-                                posx--;
-                                dir = SOUTH;
-                            }
-                        }
-                        if (dir == SOUTH)
-                        {
-                            posy++;
-                            if (taken.count({posx, posy}))
-                            {
-                                posy--;
-                                dir = WEST;
-                            }
-                        }
-                        if (dir == WEST)
-                        {
-                            posx--;
-                            if (taken.count({posx, posy}))
-                            {
-                                posx++;
-                                dir = CENTER;
-                            }
-                        }
-
-                        if (citytilesPos.count({posx, posy}) == 0)
-                            taken.insert({posx, posy});
-
-                        actions.push_back(unit.move(dir));
-                    }
+                    actions.push_back(unit.buildCity());
                 }
-                else if (i % 2 == 0)
+                else if (unit.getCargoSpaceLeft() > 0)
                 {
-                    if (unit.canBuild(gameMap))
-                    {
-                        actions.push_back(unit.buildCity());
-                    }
-                    else // find a free space
-                    {
-                        Cell *closestfreeTile;
-                        float closestDist = 9999999;
-
-                        for (auto it = freeTiles.begin(); it != freeTiles.end(); it++)
-                        {
-                            auto cell = *it;
-                            if (citytilesPos.count({cell->pos.x, cell->pos.y}))
-                                continue;
-                            float dist = cell->pos.distanceTo(unit.pos);
-                            if (dist < closestDist)
-                            {
-                                closestDist = dist;
-                                closestfreeTile = cell;
-                            }
-                        }
-                        if (closestfreeTile != nullptr)
-                        {
-                            auto dir = unit.pos.directionTo(closestfreeTile->pos);
-                            int posx = unit.pos.x;
-                            int posy = unit.pos.y;
-                            if (dir == NORTH)
-                            {
-                                posy--;
-                                if (taken.count({posx, posy}))
-                                {
-                                    posy++;
-                                    dir = EAST;
-                                }
-                            }
-                            if (dir == EAST)
-                            {
-                                posx++;
-                                if (taken.count({posx, posy}))
-                                {
-                                    posx--;
-                                    dir = SOUTH;
-                                }
-                            }
-                            if (dir == SOUTH)
-                            {
-                                posy++;
-                                if (taken.count({posx, posy}))
-                                {
-                                    posy--;
-                                    dir = WEST;
-                                }
-                            }
-                            if (dir == WEST)
-                            {
-                                posx--;
-                                if (taken.count({posx, posy}))
-                                {
-                                    posx++;
-                                    dir = CENTER;
-                                }
-                            }
-
-                            if (citytilesPos.count({posx, posy}) == 0)
-                                taken.insert({posx, posy});
-                            actions.push_back(unit.move(dir));
-                        }
-                    }
+                    distarray = distfromWoods;
                 }
                 else
                 {
-                    // if unit is a worker and there is no cargo space left, and we have cities, lets return to them
-                    if (player.cities.size() > 0)
-                    {
-                        auto city_iter = player.cities.begin();
-                        auto &city = city_iter->second;
-
-                        float closestDist = 999999;
-                        CityTile *closestCityTile;
-                        for (auto &citytile : city.citytiles)
-                        {
-                            float dist = citytile.pos.distanceTo(unit.pos);
-                            if (dist < closestDist)
-                            {
-                                closestCityTile = &citytile;
-                                closestDist = dist;
-                            }
-                        }
-                        if (closestCityTile != nullptr)
-                        {
-                            auto dir = unit.pos.directionTo(closestCityTile->pos);
-                            int posx = unit.pos.x;
-                            int posy = unit.pos.y;
-                            if (dir == NORTH)
-                            {
-                                posy--;
-                                if (taken.count({posx, posy}))
-                                {
-                                    posy++;
-                                    dir = EAST;
-                                }
-                            }
-                            if (dir == EAST)
-                            {
-                                posx++;
-                                if (taken.count({posx, posy}))
-                                {
-                                    posx--;
-                                    dir = SOUTH;
-                                }
-                            }
-                            if (dir == SOUTH)
-                            {
-                                posy++;
-                                if (taken.count({posx, posy}))
-                                {
-                                    posy--;
-                                    dir = WEST;
-                                }
-                            }
-                            if (dir == WEST)
-                            {
-                                posx--;
-                                if (taken.count({posx, posy}))
-                                {
-                                    posx++;
-                                    dir = CENTER;
-                                }
-                            }
-
-                            if (citytilesPos.count({posx, posy}) == 0)
-                                taken.insert({posx, posy});
-                            actions.push_back(unit.move(dir));
-                        }
-                    }
+                    if(i % 2 == 0) distarray = distfromDots;
                 }
+
+                map<int, DIRECTIONS> mp;
+
+                mp[distarray[ux][uy]] = CENTER;
+
+                if (dummyMap[ux - 1][uy] != 'p')
+                {
+                    mp[distarray[ux - 1][uy]] = WEST;
+                }
+                if (dummyMap[ux + 1][uy] != 'p')
+                {
+                    mp[distarray[ux + 1][uy]] = EAST;
+                }
+                if (dummyMap[ux][uy + 1] != 'p')
+                {
+                    mp[distarray[ux][uy + 1]] = SOUTH;
+                }
+                if (dummyMap[ux][uy - 1] != 'p')
+                {
+                    mp[distarray[ux][uy - 1]] = NORTH;
+                }
+
+                DIRECTIONS bestDirection = mp.begin()->second;
+                actions.push_back(unit.move(bestDirection));
+                unit.pos.translate(bestDirection, 1);
+                dummyMap[unit.pos.x][unit.pos.y] = 'p';
             }
         }
+
+        // -------------------------------------------------------------------------------------------------------//
 
         // you can add debug annotations using the methods of the Annotate class.
         // actions.push_back(Annotate::circle(0, 0));
