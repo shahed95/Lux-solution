@@ -14,33 +14,21 @@ using namespace lux;
 class SimplifiedGame
 {
 public:
-    vector<vector<pair<char, int>>> sMap;
 
-    SimplifiedGame();
+    static const int unvisited = 999999;
+    static const int unreachable = 999998; 
+    vector<vector<char>> sMap;
+    vector<vector<int>> sMapValue;
 
     SimplifiedGame(GameMap &gameMap, Player &player, Player &opponent);
-
-    void createSimpleMap(GameMap &gameMap);
-
-    void addResourceInMap(GameMap &gameMap);
-
-    void addCitiesInMap(Player &player, bool isOpponent);
-
-    bool isInside(int x, int y);
-
-    int closeCityCount(int x, int y, int withinDistance);
-
-    char getCellType(int x, int y);
-
-    vector<vector<int>> bfsOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos);
-
-    vector<pair<int,int> > getAllposition(string type);
-    vector<pair<int,int> > getAllposition(string type, int mod, int select);
-    vector<pair<int, int>> getAllResourcePosition(int researchPoint);
-
     vector<vector<char>> createEmptyMap(int height, int width);
-
-
+    void addResourceInMap(GameMap &gameMap);
+    void addCitiesInMap(Player &player, bool isOpponent);
+    bool isInside(int x, int y);
+    char getCell(int x, int y);
+    int countNearbyCell(int x, int y, int withinDistance, string types);
+    vector<vector<int>> bfsOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos);
+    vector<pair<int, int>> getAllposition(string type);
 };
 
 #endif

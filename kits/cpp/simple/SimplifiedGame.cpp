@@ -1,32 +1,19 @@
 #include "SimplifiedGame.h"
 
-SimplifiedGame::SimplifiedGame()
-{
-}
 SimplifiedGame::SimplifiedGame(GameMap &gameMap, Player &player, Player &opponent)
 {
-    createSimpleMap(gameMap);
+    sMap = createEmptyMap(gameMap.height, gameMap.width);
     addResourceInMap(gameMap);
     addCitiesInMap(player, false);
     addCitiesInMap(opponent, true);
 }
 
-void SimplifiedGame::createSimpleMap(GameMap &gameMap)
-{
-    for (int i = 0; i < gameMap.height; i++)
-    {
-        vector<pair<char, int>> temp(gameMap.width, {'.', 0});
-        sMap.push_back(temp);
-    }
-}
-
 vector<vector<char>> SimplifiedGame::createEmptyMap(int height, int width)
 {
     vector<vector<char>> ret;
-
     for (int i = 0; i < height; i++)
     {
-        vector<char> temp(width, {'.'});
+        vector<char> temp(width, '.');
         ret.push_back(temp);
     }
     return ret;
@@ -40,20 +27,18 @@ void SimplifiedGame::addResourceInMap(GameMap &gameMap)
         {
             Cell *cell = gameMap.getCell(x, y);
             if (cell->hasResource())
-                sMap[x][y] = {cell->getResourceType(), cell->resource.amount}; // 'w', 'c', 'u'
+                sMap[x][y] = cell->getResourceType();
         }
     }
 }
 
 void SimplifiedGame::addCitiesInMap(Player &player, bool isOpponent)
 {
-    int id = 0;
     for (auto city : player.cities)
     {
-        id++;
         for (auto citytiles : city.second.citytiles)
         {
-            sMap[citytiles.pos.x][citytiles.pos.y] = {isOpponent ? 'z' : 'y', id};
+            sMap[citytiles.pos.x][citytiles.pos.y] = isOpponent ? 'z' : 'y';
         }
     }
 }
@@ -67,10 +52,10 @@ bool SimplifiedGame::isInside(int x, int y)
     return true;
 }
 
-char SimplifiedGame::getCellType(int x, int y)
+char SimplifiedGame::getCell(int x, int y)
 {
     if (isInside(x, y))
-        return sMap[x][y].first;
+        return sMap[x][y];
     else
         return '*';
 }
@@ -81,9 +66,6 @@ vector<vector<int>> SimplifiedGame::bfsOnMap(vector<pair<int, int>> startingPos,
     int dy[] = {1, -1, 0, 0};
 
     vector<vector<int>> dist;
-
-    int unvisited = 999999;
-    int unreachable = 999998;
 
     for (int i = 0; i < sMap.size(); i++)
     {
@@ -134,7 +116,7 @@ vector<pair<int, int>> SimplifiedGame::getAllposition(string types)
     {
         for (int j = 0; j < sMap[i].size(); j++)
         {
-            if (types.find(sMap[i][j].first) != std::string::npos)
+            if (types.find(sMap[i][j]) != std::string::npos)
             {
                 v.push_back({i, j});
             }
@@ -144,49 +126,23 @@ vector<pair<int, int>> SimplifiedGame::getAllposition(string types)
     return v;
 }
 
-int SimplifiedGame::closeCityCount(int x, int y, int withinDistance)
+int SimplifiedGame::countNearbyCell(int x, int y, int withinDistance, string types) // Todo : optimize
 {
-    if (!isInside(x, y))
-        return 0;
-
     int ret = 0;
     for (int d = 0; d <= withinDistance; d++)
     {
         for (int dx = 0; dx <= d; dx++)
         {
             int dy = d - dx;
-            if (getCellType(x + dx, y + dy) == 'y')
+            if (types.find(getCell(x + dx, y + dy)) != std::string::npos)
                 ret++;
-            if (dy != 0 && getCellType(x + dx, y - dy) == 'y')
+            if (dy != 0 && types.find(getCell(x + dx, y - dy)) != std::string::npos)
                 ret++;
-            if (dx != 0 && getCellType(x - dx, y + dy) == 'y')
+            if (dx != 0 && types.find(getCell(x - dx, y + dy)) != std::string::npos)
                 ret++;
-            if (dx != 0 && dy != 0 && getCellType(x - dx, y - dy) == 'y')
+            if (dx != 0 && dy != 0 && types.find(getCell(x - dx, y - dy)) != std::string::npos)
                 ret++;
         }
     }
     return ret;
-}
-
-vector<pair<int, int>> SimplifiedGame::getAllResourcePosition(int researchPoint)
-{
-    string resourceString = "w";
-    if (researchPoint >= 50)
-        resourceString += "c";
-    if (researchPoint >= 200)
-        resourceString += "u";
-
-    vector<pair<int, int>> v;
-
-    for (int i = 0; i < sMap.size(); i++)
-    {
-        for (int j = 0; j < sMap[i].size(); j++)
-        {
-            if (resourceString.find(sMap[i][j].first) != std::string::npos && closeCityCount(i,j,1)==0)
-            {
-                v.push_back({i, j});
-            }
-        }
-    }
-    return v;
 }

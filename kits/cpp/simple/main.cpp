@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include "SimplifiedGame.h"
 #include "SimplifiedGame.cpp"
+#include "ClusterMaker.h"
+#include "ClusterMaker.cpp"
 using namespace std;
 using namespace lux;
 
@@ -23,7 +25,7 @@ const DIRECTIONS D[] = {CENTER, SOUTH, NORTH, WEST, EAST};
 
 string unitAction(Unit unit, vector<vector<int>> &distArray, vector<vector<char>> &visit, SimplifiedGame &sGame)
 {
-    int closestDist = 999999;
+    int closestDist = sGame.unvisited + 5;
     DIRECTIONS closestDirection;
     int closestX, closestY;
     for (int i = 0; i < 5; i++)
@@ -42,11 +44,13 @@ string unitAction(Unit unit, vector<vector<int>> &distArray, vector<vector<char>
         }
     }
 
-    if (sGame.getCellType(closestX, closestY) != 'y')
+    if (sGame.getCell(closestX, closestY) != 'y')
         visit[closestX][closestY] = 'x';
 
     return unit.move(closestDirection);
 }
+
+
 
 int main()
 {
@@ -99,29 +103,45 @@ int main()
 
         // which direction each worker should move ?
         // if it's mining resources (not adjacent to city) do not move
-        //
-
         // y = my city tiles, z = opponent city tiles
 
         auto distfromCities = sGame.bfsOnMap(sGame.getAllposition("y"), sGame.getAllposition("z"));
-        auto distfromDots = sGame.bfsOnMap(sGame.getAllposition("."), sGame.getAllposition("yz"));
-
-        
+        auto distfromDots = sGame.bfsOnMap(sGame.getAllposition("."), sGame.getAllposition("z"));
 
         // make many dist resource
+        string needResource = (player.researchPoints >= 200) ? "ucw" : ((player.researchPoints >= 50) ? "cw" : "w");
+        ClusterMaker clusterMaker;
+        clusterMaker.make(sGame.sMap,needResource);
 
-        auto distfromResource = sGame.bfsOnMap(sGame.getAllResourcePosition(player.researchPoints), sGame.getAllposition("zwcu"));
+        vector<vector<int>> distfromResource[clusterMaker.clusters.size()];
+
+        for(int i=0; i<clusterMaker.clusters.size(); i++)
+        {
+            distfromResource[i] = sGame.bfsOnMap(clusterMaker.clusters[i], sGame.getAllposition("z"));
+        }
+
+        map<int,int> taken;
 
         vector<vector<char>> visit = sGame.createEmptyMap(gameMap.height, gameMap.width);
-
         for (int i = 0; i < player.units.size(); i++)
         {
             Unit unit = player.units[i];
+            int dayLeft = 40 - (gameState.turn % 40);
 
             if (!unit.canAct())
                 continue;
 
-            auto &distArray = distfromResource;
+            auto &distArray = distfromResource[0];
+            int select = 0;
+
+            for(int j=0; j<clusterMaker.clusters.size(); j++)
+            {
+                if(distfromResource[j][unit.pos.x][unit.pos.y] <= distArray[unit.pos.x][unit.pos.y] && taken[j]<=clusterMaker.clusters[j].size())
+                {
+                    distArray = distfromResource[j];
+                    taken[j]++;
+                }
+            }
 
             if (unit.getCargoSpaceLeft() == 0)
             {
@@ -137,10 +157,6 @@ int main()
                 }
                 else
                     distArray = distfromCities;
-            }
-            else if ((gameState.turn % 40 + 5) >= 30 && sGame.closeCityCount(unit.pos.x, unit.pos.y, 5))
-            {
-                distArray = distfromCities;
             }
 
             actions.push_back(unitAction(unit, distArray, visit, sGame));
