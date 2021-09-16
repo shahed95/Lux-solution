@@ -148,7 +148,7 @@ int main()
 
             if (unit.getCargoSpaceLeft() == 0)
             {
-                if (i % 2 == 0)
+                if (i % 2 == 0 || gameState.turn <=20)
                 {
                     if (unit.canBuild(gameMap))
                     {
