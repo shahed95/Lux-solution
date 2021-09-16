@@ -27,7 +27,7 @@ string unitAction(Unit unit, vector<vector<int>> &distArray, vector<vector<char>
 {
     int closestDist = sGame.unvisited + 5;
     DIRECTIONS closestDirection;
-    int closestX, closestY;
+    int closestX = -1, closestY = -1;
     for (int i = 0; i < 5; i++)
     {
         int goX = unit.pos.x + DX[i];
@@ -43,7 +43,10 @@ string unitAction(Unit unit, vector<vector<int>> &distArray, vector<vector<char>
             }
         }
     }
-
+    if(closestX == -1)
+    {
+        return unit.move(D[rand()%5]);
+    }
     if (sGame.getCell(closestX, closestY) != 'y')
         visit[closestX][closestY] = 'x';
 
@@ -145,7 +148,7 @@ int main()
 
             if (unit.getCargoSpaceLeft() == 0)
             {
-                if (unit.favoriteNumber % 2 == 0)
+                if (i % 2 == 0)
                 {
                     if (unit.canBuild(gameMap))
                     {
@@ -157,6 +160,9 @@ int main()
                 }
                 else
                     distArray = distfromCities;
+            } else if(dayLeft < 0)
+            {
+                distArray = distfromCities;
             }
 
             actions.push_back(unitAction(unit, distArray, visit, sGame));
