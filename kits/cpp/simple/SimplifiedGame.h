@@ -28,6 +28,7 @@ public:
     char getCell(int x, int y);
     int countNearbyCell(int x, int y, int withinDistance, string types);
     vector<vector<int>> bfsOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos);
+    vector<vector<int>> dijkstraOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos);
     vector<pair<int, int>> getAllposition(string type);
 };
 
