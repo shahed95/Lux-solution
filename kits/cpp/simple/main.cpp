@@ -4,9 +4,7 @@
 #include <vector>
 #include <set>
 #include <stdio.h>
-#include "SimplifiedGame.h"
 #include "SimplifiedGame.cpp"
-#include "ClusterMaker.h"
 #include "ClusterMaker.cpp"
 using namespace std;
 using namespace lux;
@@ -23,16 +21,16 @@ const int DX[] = {0, 0, 0, -1, 1};
 const int DY[] = {0, 1, -1, 0, 0};
 const DIRECTIONS D[] = {CENTER, SOUTH, NORTH, WEST, EAST};
 
-string unitAction(Unit unit, vector<vector<int>> &distArray, vector<vector<char>> &visit, SimplifiedGame &sGame)
+string unitAction(Unit unit, vector<vector<int>> &distArray, vector<vector<char>> &visit, SimplifiedGame *sGame)
 {
-    int closestDist = sGame.unvisited;
+    int closestDist = sGame->unvisited;
     DIRECTIONS closestDirection;
     int closestX = -1, closestY = -1;
     for (int i = 0; i < 5; i++)
     {
         int goX = unit.pos.x + DX[i];
         int goY = unit.pos.y + DY[i];
-        if (sGame.isInside(goX, goY) && visit[goX][goY] == '.')
+        if (sGame->isInside(goX, goY) && visit[goX][goY] == '.')
         {
             if (distArray[goX][goY] < closestDist)
             {
@@ -47,7 +45,7 @@ string unitAction(Unit unit, vector<vector<int>> &distArray, vector<vector<char>
     {
         return unit.move(D[rand() % 5]);
     }
-    if (sGame.getCell(closestX, closestY) != 'y')
+    if (sGame->getCell(closestX, closestY) != 'y')
         visit[closestX][closestY] = 'x';
 
     return unit.move(closestDirection);
@@ -58,7 +56,7 @@ int main()
     kit::Agent gameState = kit::Agent();
     // initialize
     gameState.initialize();
-
+    SimplifiedGame *sGame = SimplifiedGame::getInstance();
     while (true)
     {
 
@@ -74,7 +72,7 @@ int main()
         Player &opponent = gameState.players[(gameState.id + 1) % 2];
         GameMap &gameMap = gameState.map;
 
-        SimplifiedGame sGame = SimplifiedGame(gameMap, player, opponent);
+        sGame->updateGame(gameMap, player, opponent);
 
         //-------------------------------------------------------------------------------------------------------//
         // city Action AI
@@ -106,24 +104,24 @@ int main()
         // if it's mining resources (not adjacent to city) do not move
         // y = my city tiles, z = opponent city tiles
 
-        auto distfromCities = sGame.bfsOnMap(sGame.getAllposition("y"), sGame.getAllposition("z"));
-        auto distfromDots = sGame.bfsOnMap(sGame.getAllposition("."), sGame.getAllposition("yz"));
+        auto distfromCities = sGame->bfsOnMap(sGame->getAllposition("y"), sGame->getAllposition("z"));
+        auto distfromDots = sGame->bfsOnMap(sGame->getAllposition("."), sGame->getAllposition("yz"));
 
         // make many dist resource
         string needResource = (player.researchPoints >= 200) ? "ucw" : ((player.researchPoints >= 50) ? "cw" : "w");
         ClusterMaker clusterMaker;
-        clusterMaker.make(sGame.sMap, needResource);
+        clusterMaker.make(sGame->sMap, needResource);
 
         vector<vector<int>> distfromResource[clusterMaker.clusters.size()];
 
         for (int i = 0; i < clusterMaker.clusters.size(); i++)
         {
-            distfromResource[i] = sGame.bfsOnMap(clusterMaker.clusters[i], sGame.getAllposition("z"));
+            distfromResource[i] = sGame->bfsOnMap(clusterMaker.clusters[i], sGame->getAllposition("z"));
         }
 
         map<int, int> taken;
 
-        vector<vector<char>> visit = sGame.createEmptyMap(gameMap.height, gameMap.width);
+        vector<vector<char>> visit = sGame->createEmptyMap(gameMap.height, gameMap.width);
 
 
         for (int i = 0; i < player.units.size(); i++)

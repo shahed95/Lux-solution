@@ -1,11 +1,28 @@
-#include "SimplifiedGame.h"
+#include "SimplifiedGame.hpp"
 
-SimplifiedGame::SimplifiedGame(GameMap &gameMap, Player &player, Player &opponent)
+SimplifiedGame* SimplifiedGame::simplifiedGame = 0;
+
+SimplifiedGame::SimplifiedGame()
+{
+
+}
+
+void SimplifiedGame::updateGame(GameMap &gameMap, Player &player, Player &opponent)
 {
     sMap = createEmptyMap(gameMap.height, gameMap.width);
     addResourceInMap(gameMap);
     addCitiesInMap(player, false);
     addCitiesInMap(opponent, true);
+    sMapHistory.push_back(sMap);
+}
+
+SimplifiedGame *SimplifiedGame::getInstance()
+{
+    if(simplifiedGame == nullptr)
+    {
+        simplifiedGame = new SimplifiedGame();
+    }
+    return simplifiedGame;
 }
 
 vector<vector<char>> SimplifiedGame::createEmptyMap(int height, int width)

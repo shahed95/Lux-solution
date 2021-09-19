@@ -1,4 +1,4 @@
-#include "ClusterMaker.h"
+#include "ClusterMaker.hpp"
 
 void ClusterMaker::make(vector<vector<char>> _grid, string types)
 {
@@ -19,7 +19,6 @@ void ClusterMaker::make(vector<vector<char>> _grid, string types)
                 clusters.push_back(temp);
         }
     }
-    random_shuffle(belongs.begin(),belongs.end());
 }
 
 void ClusterMaker::dfs(int posX, int posY, string &types)
