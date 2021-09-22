@@ -2,18 +2,6 @@
 #define GAMEDATA_H
 #pragma once
 
-#include "lux/kit.hpp"
-#include "lux/define.cpp"
-#include <string.h>
-#include <vector>
-#include <queue>
-#include <set>
-#include <map>
-#include <stdio.h>
-#include "GameAlgo.cpp"
-using namespace std;
-using namespace lux;
-
 // singleton Class
 // common access point
 // knows everything
@@ -33,6 +21,9 @@ public:
     GameMap gameMap;
 
     vector<vector<char>> simpleMap;
+    vector<vector<int>> distfromCities;
+    vector<vector<int>> distfromDots;
+    vector<vector<int>> distfromResource;
 
     static GameData *getInstance();
     void updateGameData(kit::Agent gameState);

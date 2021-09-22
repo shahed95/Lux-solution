@@ -1,4 +1,4 @@
-#include "GameAlgo.hpp"
+
 
 vector<vector<char>> GameAlgo::createSimpleMap(GameMap &gameMap, Player &player, Player &opponent)
 {

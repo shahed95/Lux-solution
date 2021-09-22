@@ -1,16 +1,6 @@
 #ifndef GAME_ALGO
 #define GAME_ALGO
-
-#include "lux/kit.hpp"
-#include "lux/define.cpp"
-#include <string.h>
-#include <vector>
-#include <queue>
-#include <set>
-#include <map>
-#include <stdio.h>
-using namespace std;
-using namespace lux;
+#pragma once
 
 
 // Game Algos, independent functions

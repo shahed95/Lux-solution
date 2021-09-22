@@ -1,4 +1,3 @@
-#include "GameData.hpp"
 
 GameData *GameData::gameData = 0;
 
@@ -33,6 +32,9 @@ void GameData::updateGameData(kit::Agent gameState)
             {
                 simpleMap[unit.pos.x][unit.pos.y] = 'b';
             }
+
         }
+        //auto distfromCities = sGame.bfsOnMap(sGame.getAllposition("y"), sGame.getAllposition("z"));
+        //auto distfromDots = sGame.bfsOnMap(sGame.getAllposition("."), sGame.getAllposition("yz"));
     }
 }
