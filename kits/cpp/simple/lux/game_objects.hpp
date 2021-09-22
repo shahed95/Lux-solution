@@ -15,8 +15,31 @@ namespace lux
         int uranium = 0;
         Cargo(){};
     };
+    
+    class Unit;
+
+    class UnitState
+    {
+    protected:
+        Unit *unit;
+
+    public:
+        virtual ~UnitState() {
+        }
+        void set_context(Unit *_unit)
+        {
+            this->unit = _unit;
+        }
+
+        virtual string act() = 0;
+        virtual void prepare_act() = 0;
+    };
+
     class Unit
     {
+    protected:
+        UnitState *unitState;
+
     public:
         lux::Position pos;
         int team;
@@ -24,7 +47,6 @@ namespace lux
         int type;
         int cooldown;
         Cargo cargo;
-        int favoriteNumber;
         Unit(){};
         Unit(int teamid, int type, const string &unitid, int x, int y, int cooldown, int wood, int coal, int uranium)
         {
@@ -36,8 +58,29 @@ namespace lux
             this->cargo.wood = wood;
             this->cargo.coal = coal;
             this->cargo.uranium = uranium;
-            this->favoriteNumber = rand();
+            this->unitState = nullptr;
         };
+
+        ~Unit()
+        {
+            delete unitState;
+        }
+
+        void TransitionTo(UnitState *state)
+        {
+            if (this->unitState != nullptr)
+                delete this->unitState;
+            this->unitState = state;
+            this->unitState->set_context(this);
+        }
+        void prepare_act()
+        {
+            unitState->prepare_act();
+        }
+        string act()
+        {
+            return unitState->act();
+        }
         bool isWorker() const
         {
             return this->type == 0;
@@ -112,6 +155,9 @@ namespace lux
             return "p " + this->id;
         }
     };
+
+    
+
     class Player
     {
     public:
