@@ -24,15 +24,14 @@ namespace lux
         Unit *unit;
 
     public:
-        virtual ~UnitState() {
-        }
         void set_context(Unit *_unit)
         {
             this->unit = _unit;
         }
 
         virtual string act() = 0;
-        virtual void prepare_act() = 0;
+        virtual void prepareAct() = 0;
+        virtual string stateName() = 0;
     };
 
     class Unit
@@ -61,11 +60,6 @@ namespace lux
             this->unitState = nullptr;
         };
 
-        ~Unit()
-        {
-            delete unitState;
-        }
-
         void TransitionTo(UnitState *state)
         {
             if (this->unitState != nullptr)
@@ -75,11 +69,19 @@ namespace lux
         }
         void prepare_act()
         {
-            unitState->prepare_act();
+            this->unitState->prepareAct();
+        }
+        string getStateName()
+        {
+            return this->unitState->stateName();
+        }
+        UnitState* getState()
+        {
+            return this->unitState;
         }
         string act()
         {
-            return unitState->act();
+            return this->unitState->act();
         }
         bool isWorker() const
         {

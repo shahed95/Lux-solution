@@ -93,6 +93,11 @@ vector<vector<int>> GameAlgo::bfsOnMap(vector<pair<int, int>> startingPos, vecto
     return dist;
 }
 
+vector<vector<int>> GameAlgo::createDistanceArray(string sources, string blocks, vector<vector<char>> &simpleMap)
+{
+    return bfsOnMap(getAllposition(sources,simpleMap), getAllposition(blocks,simpleMap),simpleMap);
+}
+
 vector<vector<int>> GameAlgo::dijkstraOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos, vector<vector<char>> &simpleMap)
 {
     int dx[] = {0, 0, -1, 1};
@@ -173,7 +178,7 @@ vector<pair<int, int>> GameAlgo::getAllposition(string types, vector<vector<char
     return v;
 }
 
-DIRECTIONS GameAlgo::moveDirection(Unit unit, vector<vector<int>> &distArray, vector<vector<char>> &simpleMap)
+DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, vector<vector<char>> &simpleMap)
 {
     int DX[] = {0, 0, 0, -1, 1};
     int DY[] = {0, 1, -1, 0, 0};
@@ -185,8 +190,8 @@ DIRECTIONS GameAlgo::moveDirection(Unit unit, vector<vector<int>> &distArray, ve
 
     for (int i = 0; i < 5; i++)
     {
-        int goX = unit.pos.x + DX[i];
-        int goY = unit.pos.y + DY[i];
+        int goX = unit->pos.x + DX[i];
+        int goY = unit->pos.y + DY[i];
 
         char goCellvalue = getCell(goX,goY,simpleMap);
 

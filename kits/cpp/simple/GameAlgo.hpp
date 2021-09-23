@@ -2,7 +2,7 @@
 #define GAME_ALGO
 #pragma once
 
-
+#include <queue>
 // Game Algos, independent functions
 // static class
 
@@ -21,8 +21,9 @@ public:
     static vector<vector<int>> bfsOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos, vector<vector<char>> &simpleMap);
     static vector<vector<int>> dijkstraOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos, vector<vector<char>> &simpleMap);
     static vector<pair<int, int>> getAllposition(string type, vector<vector<char>> &simpleMap);
-    static DIRECTIONS moveDirection(Unit unit, vector<vector<int>> &distArray, vector<vector<char>> &simpleMap);
+    static DIRECTIONS moveDirection(Unit *unit, vector<vector<int>> &distArray, vector<vector<char>> &simpleMap);
     static pair<int,int> getPosition(int x, int y, DIRECTIONS d);
+    static vector<vector<int>> createDistanceArray(string sources, string blocks, vector<vector<char>> &simpleMap);
 };
 
 #endif

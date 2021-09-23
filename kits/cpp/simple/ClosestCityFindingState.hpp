@@ -7,7 +7,10 @@ class ClosestCityFindingState  : public UnitState
 private:
 public:
     string act() override;
-    void prepare_act() override;
-
+    void prepareAct() override;
+    string stateName() override
+    {
+        return "ClosestCityFindingState";
+    }
 };
 #endif
