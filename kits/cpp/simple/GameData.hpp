@@ -25,10 +25,10 @@ public:
     vector<vector<int>> distfromDots;
     vector<vector<int>> distfromResource;
 
-    map <string, UnitState*> unitStateMap;
+    vector<Cluster> resourceClusters;
 
     static GameData *getInstance();
     void updateGameData(kit::Agent gameState);
-    void updateUnitState(Unit &unit);
+    void updateCluster();
 };
 #endif

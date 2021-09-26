@@ -3,7 +3,6 @@ GameData *GameData::gameData = 0;
 
 GameData::GameData()
 {
-
 }
 
 GameData *GameData::getInstance()
@@ -17,54 +16,48 @@ GameData *GameData::getInstance()
 
 void GameData::updateGameData(kit::Agent gameState)
 {
-    if (gameState.turn == gameStateHistory.size())
-    {
-        this->gameState = gameState;
-        gameStateHistory.push_back(this->gameState);
-        
-        // save basic data
-        player = gameState.players[gameState.id];
-        opponent = gameState.players[(gameState.id + 1) % 2];
-        gameMap = gameState.map;
+    if (gameState.turn != gameStateHistory.size())
+        return;
 
-        // create a simplified game map with resource, city, and blocked cells
-        simpleMap = GameAlgo::createSimpleMap(gameMap,player,opponent);
-        for (int i = 0; i < player.units.size(); i++)
-        {
-            Unit &unit = player.units[i];
-            if(!unit.canAct() && simpleMap[unit.pos.x][unit.pos.y] == '.')
-            {
-                simpleMap[unit.pos.x][unit.pos.y] = 'b';
-            }
-        }
+    this->gameState = gameState;
+    gameStateHistory.push_back(this->gameState);
 
+    // save basic data
+    player = gameState.players[gameState.id];
+    opponent = gameState.players[(gameState.id + 1) % 2];
+    gameMap = gameState.map;
 
-        // create "distance from target" arrays which will help units to decide which cell to move 
-        distfromCities = GameAlgo::createDistanceArray("y","zb",simpleMap);
-        distfromDots = GameAlgo::createDistanceArray(".","yzb",simpleMap);
-        string needResource = (player.researchPoints >= 200) ? "ucw" : ((player.researchPoints >= 50) ? "cw" : "w");
-        distfromResource = GameAlgo::createDistanceArray(needResource,"zb",simpleMap);
-    
-        // give each unit a state, it gets cleared in every turn, so need to save in map
+    // create a simplified game map with resource, city, and blocked cells
+    simpleMap = GameAlgo::createSimpleMap(gameMap, player, opponent);
 
-        for (int i = 0; i < player.units.size(); i++)
-        {
-            Unit &unit = player.units[i]; // using reference is important here
-            if(unitStateMap.count(unit.id) == 0) // new unit
-            {
-                unitStateMap[unit.id] = new ClosestCityFindingState();
-            }
-            unit.TransitionTo(unitStateMap[unit.id]);
-        }
-    }
+    // create "distance from target" arrays which will help units to decide which cell to move
+    distfromCities = GameAlgo::createDistanceArray("y", "zb", simpleMap);
+    distfromDots = GameAlgo::createDistanceArray(".", "yzb", simpleMap);
+    string needResource = (player.researchPoints >= 200) ? "ucw" : ((player.researchPoints >= 50) ? "cw" : "w");
+    distfromResource = GameAlgo::createDistanceArray(needResource, "zb", simpleMap);
+
+    updateCluster();
 }
 
-
-void GameData::updateUnitState(Unit &unit)
+void GameData::updateCluster()
 {
-    if(unit.getState() == nullptr)
+    if (gameState.turn == 0)
     {
-        return;    
+        vector<vector<char>> tempMap = simpleMap;
+        for (int i = 0; i < tempMap.size(); i++)
+        {
+            for (int j = 0; j < tempMap[i].size(); j++)
+            {
+                if (tempMap[i][j] == 'w' || tempMap[i][j] == 'c' || tempMap[i][j] == 'u')
+                {
+                    resourceClusters.push_back(Cluster(tempMap, tempMap[i][j], {i, j}));
+                    for (auto u : resourceClusters.back().cells)
+                        tempMap[u.first][u.second] = '.';
+                }
+            }
+        }
     }
-    unitStateMap[unit.id] = unit.getState();
+
+    for (auto &u : resourceClusters)
+        u.updateCluster(gameData->simpleMap);
 }

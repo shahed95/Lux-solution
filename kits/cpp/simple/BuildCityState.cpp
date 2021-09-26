@@ -1,12 +1,20 @@
 string BuildCityState::act()
 {
-    return this->unit->buildCity();
+    auto g = GameData::getInstance();
+    auto u = this->unit;
+    if(u->canBuild(g->gameMap))
+    {
+        return u->buildCity();
+    }
+    return u->move(DIRECTIONS::CENTER);
 }
 
 void BuildCityState::prepareAct()
 {
-    if(this->unit->getCargoSpaceLeft()!=0) // build done
+    auto g = GameData::getInstance();
+    auto u = this->unit;
+    if(u->getCargoSpaceLeft()!=0) // build done
     {
-        this->unit->TransitionTo(new ClosestResourceFindingState());
+        u->TransitionTo(new ClosestResourceFindingState());
     }
 }

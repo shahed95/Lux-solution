@@ -22,17 +22,25 @@ vector<vector<char>> GameAlgo::createSimpleMap(GameMap &gameMap, Player &player,
     for (auto city : player.cities)
     {
         for (auto citytiles : city.second.citytiles)
-        {
             simpleMap[citytiles.pos.x][citytiles.pos.y] = 'y';
-        }
     }
 
     for (auto city : opponent.cities)
     {
         for (auto citytiles : city.second.citytiles)
-        {
             simpleMap[citytiles.pos.x][citytiles.pos.y] = 'z';
-        }
+    }
+
+    for (auto &unit : player.units)
+    {
+        if (!unit.canAct() && simpleMap[unit.pos.x][unit.pos.y] == '.')
+            simpleMap[unit.pos.x][unit.pos.y] = 'b';
+    }
+
+    for (auto &unit : opponent.units)
+    {
+        if (!unit.canAct() && simpleMap[unit.pos.x][unit.pos.y] == '.')
+            simpleMap[unit.pos.x][unit.pos.y] = 'b';
     }
 
     return simpleMap;
@@ -95,7 +103,7 @@ vector<vector<int>> GameAlgo::bfsOnMap(vector<pair<int, int>> startingPos, vecto
 
 vector<vector<int>> GameAlgo::createDistanceArray(string sources, string blocks, vector<vector<char>> &simpleMap)
 {
-    return bfsOnMap(getAllposition(sources,simpleMap), getAllposition(blocks,simpleMap),simpleMap);
+    return bfsOnMap(getAllposition(sources, simpleMap), getAllposition(blocks, simpleMap), simpleMap);
 }
 
 vector<vector<int>> GameAlgo::dijkstraOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos, vector<vector<char>> &simpleMap)
@@ -183,7 +191,7 @@ DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, v
     int DX[] = {0, 0, 0, -1, 1};
     int DY[] = {0, 1, -1, 0, 0};
     DIRECTIONS D[] = {CENTER, SOUTH, NORTH, WEST, EAST};
-    
+
     int closestDist = unvisited;
     DIRECTIONS closestDirection = CENTER;
     int closestX = -1, closestY = -1;
@@ -193,9 +201,9 @@ DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, v
         int goX = unit->pos.x + DX[i];
         int goY = unit->pos.y + DY[i];
 
-        char goCellvalue = getCell(goX,goY,simpleMap);
+        char goCellvalue = getCell(goX, goY, simpleMap);
 
-        if (goCellvalue !='z' && goCellvalue !='b' && goCellvalue !='*') 
+        if (goCellvalue != 'z' && goCellvalue != 'b' && goCellvalue != '*')
         {
             if (distArray[goX][goY] < closestDist)
             {
@@ -208,17 +216,17 @@ DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, v
     return closestDirection;
 }
 
-pair<int,int> GameAlgo::getPosition(int x, int y, DIRECTIONS d)
+pair<int, int> GameAlgo::getPosition(int x, int y, DIRECTIONS d)
 {
     int DX[] = {0, 0, 0, -1, 1};
     int DY[] = {0, 1, -1, 0, 0};
     DIRECTIONS D[] = {CENTER, SOUTH, NORTH, WEST, EAST};
 
-    for(int i=0; i<5; i++)
+    for (int i = 0; i < 5; i++)
     {
-        if(D[i] == d)
+        if (D[i] == d)
         {
-            return {x+DX[i],y+DY[i]};
+            return {x + DX[i], y + DY[i]};
         }
     }
 }

@@ -4,7 +4,10 @@ string ClosestBuildSpaceFindingState::act()
 {
     auto g = GameData::getInstance();
     auto u = this->unit;
-    return u->move(GameAlgo::moveDirection(u,g->distfromDots,g->simpleMap));
+    auto dir = GameAlgo::moveDirection(u,g->distfromDots,g->simpleMap);
+    auto newPos = GameAlgo::getPosition(u->pos.x,u->pos.y,dir);
+    g->simpleMap[newPos.first][newPos.second] = 'b';
+    return u->move(dir);
 }
 
 void ClosestBuildSpaceFindingState::prepareAct()
@@ -15,8 +18,7 @@ void ClosestBuildSpaceFindingState::prepareAct()
     {
         u->TransitionTo(new ClosestResourceFindingState());
     }
-
-    if(GameAlgo::getCell(u->pos.x, u->pos.y, g->simpleMap) == '.') // builable
+    else if(GameAlgo::getCell(u->pos.x, u->pos.y, g->simpleMap) == '.') // builable
     {
         this->unit->TransitionTo(new BuildCityState());
     }

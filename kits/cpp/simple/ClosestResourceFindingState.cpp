@@ -3,7 +3,10 @@ string ClosestResourceFindingState::act()
 {
     auto g = GameData::getInstance();
     auto u = this->unit;
-    return u->move(GameAlgo::moveDirection(u, g->distfromResource, g->simpleMap));
+    auto dir = GameAlgo::moveDirection(u,g->distfromResource,g->simpleMap);
+    auto newPos = GameAlgo::getPosition(u->pos.x,u->pos.y,dir);
+    g->simpleMap[newPos.first][newPos.second] = 'b';
+    return u->move(dir);
 }
 
 void ClosestResourceFindingState::prepareAct()
