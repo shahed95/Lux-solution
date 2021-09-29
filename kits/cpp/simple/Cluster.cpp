@@ -5,6 +5,7 @@ Cluster::Cluster(vector<vector<char>> simpleMap, char _type, pair<int, int> sour
     int dy[] = {1, -1, 0, 0, 1, -1, 1, -1};
     startpos = sourcePos;
     this->type = _type;
+    this->islocked = 0;
 
     queue<pair<int, int>> q;
     q.push(sourcePos);

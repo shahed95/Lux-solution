@@ -3,8 +3,15 @@ string ClosestResourceFindingState::act()
 {
     auto g = GameData::getInstance();
     auto u = this->unit;
-    auto dir = GameAlgo::moveDirection(u,g->distfromResource,g->simpleMap);
-    auto newPos = GameAlgo::getPosition(u->pos.x,u->pos.y,dir);
+    auto dir = GameAlgo::moveDirection(u, g->distfromResource, g->simpleMap);
+    auto newPos = GameAlgo::getPosition(u->pos.x, u->pos.y, dir);
+    int dayleft = 30 - (g->gameState.turn % 40);
+
+    if(dayleft <= 2 && g->simpleMap[newPos.first][newPos.second]!='y' && g->simpleMap[u->pos.x][u->pos.y] == 'y')
+    {
+        return u->move(DIRECTIONS::CENTER);
+    }
+
     g->simpleMap[newPos.first][newPos.second] = 'b';
     return u->move(dir);
 }
@@ -16,11 +23,7 @@ void ClosestResourceFindingState::prepareAct()
 
     if (u->getCargoSpaceLeft() == 0) // success
     {
-        if (rand() % 2 == 0 && g->player.units.size() > 4)
-        {
-            u->TransitionTo(new ClosestCityFindingState());
-        }
-        else if (GameAlgo::getCell(u->pos.x, u->pos.y, g->simpleMap) == '.')
+        if (GameAlgo::getCell(u->pos.x, u->pos.y, g->simpleMap) == '.')
         {
             u->TransitionTo(new BuildCityState());
         }

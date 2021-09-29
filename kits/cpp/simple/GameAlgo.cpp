@@ -188,15 +188,19 @@ vector<pair<int, int>> GameAlgo::getAllposition(string types, vector<vector<char
 
 DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, vector<vector<char>> &simpleMap)
 {
-    int DX[] = {0, 0, 0, -1, 1};
-    int DY[] = {0, 1, -1, 0, 0};
-    DIRECTIONS D[] = {CENTER, SOUTH, NORTH, WEST, EAST};
+    int DX[] = {0, 0, -1, 1, 0};
+    int DY[] = {1, -1, 0, 0, 0};
+    DIRECTIONS D[] = {SOUTH, NORTH, WEST, EAST, CENTER};
 
     int closestDist = unvisited;
     DIRECTIONS closestDirection = CENTER;
     int closestX = -1, closestY = -1;
 
-    for (int i = 0; i < 5; i++)
+    vector <int> options;
+    for(int i=0; i<5; i++) options.push_back(i);
+    random_shuffle(options.begin(),options.end());
+
+    for (auto i:options)
     {
         int goX = unit->pos.x + DX[i];
         int goY = unit->pos.y + DY[i];

@@ -15,7 +15,10 @@ void ClosestCityFindingState::prepareAct()
     // probable cases: in city, no city ... 
     auto g = GameData::getInstance();
     auto u = this->unit;
-
+    if(g->player.cityTileCount == 0)
+    {
+        this->unit->TransitionTo(new ClosestResourceFindingState());
+    }
     if(GameAlgo::getCell(u->pos.x, u->pos.y, g->simpleMap) == 'y') 
     {
         this->unit->TransitionTo(new ClosestResourceFindingState());

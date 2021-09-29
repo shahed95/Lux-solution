@@ -5,11 +5,11 @@
 class UnitExtraData
 {
 private:
-    map<string, Unit> backup;
+    
 
 public:
-    void backupUnitExtraData(Player &player);
-    void restoreUnitExtraData(Player &player);
-    void addNewUnitsExtraData(Player &player);
+    static map<string, Unit> backup;
+    static void backupUnitExtraData(Player &player);
+    static void updateUnitExtraData(Player &player);
 };
 #endif

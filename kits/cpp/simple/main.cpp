@@ -18,6 +18,8 @@ using namespace lux;
 #include "ClosestBuildSpaceFindingState.hpp"
 #include "BuildCityState.hpp"
 #include "UnitExtraData.hpp"
+#include "InsideCityState.hpp"
+#include "TargetResourceFindingState.hpp"
 
 #include "GameData.cpp"
 #include "GameAlgo.cpp"
@@ -27,23 +29,27 @@ using namespace lux;
 #include "BuildCityState.cpp"
 #include "UnitExtraData.cpp"
 #include "Cluster.cpp"
+#include "InsideCityState.cpp"
+#include "TargetResourceFindingState.cpp"
+
+/*
+1. send unit to different cluster
+2. sent 
+
+*/
 
 int main()
 {
     kit::Agent gameState = kit::Agent();
     // initialize
     gameState.initialize();
-
     GameData *gameData = GameData::getInstance();
-    UnitExtraData unitExtra;
 
     while (true)
     {
         gameState.update();
         gameData->updateGameData(gameState);
-
-        unitExtra.restoreUnitExtraData(gameData->player);
-        unitExtra.addNewUnitsExtraData(gameData->player);
+        UnitExtraData::updateUnitExtraData(gameData->player);
 
         vector<string> actions = vector<string>();
         actions.push_back(Annotate::sidetext("turn " + to_string(gameState.turn)));
@@ -91,7 +97,7 @@ int main()
         }
         cout << endl;
         // end turn
-        unitExtra.backupUnitExtraData(gameData->player);
+        UnitExtraData::backupUnitExtraData(gameData->player);
         gameState.end_turn();
     }
 

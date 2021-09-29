@@ -1,0 +1,27 @@
+string TargetResourceFindingState::act()
+{
+    auto g = GameData::getInstance();
+    auto u = this->unit;
+    auto dir = GameAlgo::moveDirection(u, g->distfromResourceCluster[u->target], g->simpleMap);
+    auto newPos = GameAlgo::getPosition(u->pos.x, u->pos.y, dir);
+    g->simpleMap[newPos.first][newPos.second] = 'b';
+    return u->move(dir);
+}
+
+void TargetResourceFindingState::prepareAct()
+{
+    auto g = GameData::getInstance();
+    auto u = this->unit;
+
+    if (g->distfromResourceCluster[u->target][u->pos.x][u->pos.y] == 0 || g->resourceClusters[u->target].cells.size() == 0)
+    {
+        u->target = -1;
+        u->TransitionTo(new ClosestCityFindingState());
+        u->prepare_act();
+        return;
+    }
+    // if(u->canBuild(g->gameMap))
+    // {
+    //     u->TransitionTo(new BuildCityState());
+    // }
+}

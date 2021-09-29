@@ -26,9 +26,15 @@ public:
     vector<vector<int>> distfromResource;
 
     vector<Cluster> resourceClusters;
+    vector<vector<vector<int>>> distfromResourceCluster;
 
     static GameData *getInstance();
     void updateGameData(kit::Agent gameState);
     void updateCluster();
+    void initDistfromCities();
+    void initDistfromResource1();
+    void initDistfromResource2();
+    void initDistfromDots1();
+    void initDistfromDots2();
 };
 #endif

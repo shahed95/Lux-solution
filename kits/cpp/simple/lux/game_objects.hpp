@@ -41,6 +41,7 @@ namespace lux
 
     public:
         lux::Position pos;
+        int target;
         int team;
         string id;
         int type;
@@ -58,6 +59,7 @@ namespace lux
             this->cargo.coal = coal;
             this->cargo.uranium = uranium;
             this->unitState = nullptr;
+            this->target = -1;
         };
 
         void TransitionTo(UnitState *state)

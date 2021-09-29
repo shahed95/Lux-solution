@@ -5,6 +5,7 @@ class Cluster
 {
 	private:
 	public:
+        int islocked;
         vector<pair<int,int>> cells;
         pair<int,int> startpos;
         char type;
