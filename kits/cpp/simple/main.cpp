@@ -32,11 +32,7 @@ using namespace lux;
 #include "InsideCityState.cpp"
 #include "TargetResourceFindingState.cpp"
 
-/*
-1. send unit to different cluster
-2. sent 
 
-*/
 
 int main()
 {

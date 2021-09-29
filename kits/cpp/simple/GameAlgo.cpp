@@ -105,69 +105,7 @@ vector<vector<int>> GameAlgo::createDistanceArray(string sources, string blocks,
 {
     return bfsOnMap(getAllposition(sources, simpleMap), getAllposition(blocks, simpleMap), simpleMap);
 }
-
-vector<vector<int>> GameAlgo::dijkstraOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos, vector<vector<char>> &simpleMap)
-{
-    int dx[] = {0, 0, -1, 1};
-    int dy[] = {1, -1, 0, 0};
-
-    vector<vector<int>> dist;
-    vector<vector<bool>> vis;
-
-    for (int i = 0; i < simpleMap.size(); i++)
-    {
-        vector<int> temp(simpleMap[0].size(), unvisited);
-        vector<bool> tempbool(simpleMap[0].size(), false);
-
-        dist.push_back(temp);
-        vis.push_back(tempbool);
-    }
-
-    for (int i = 0; i < unreachablePos.size(); i++)
-    {
-        dist[unreachablePos[i].first][unreachablePos[i].second] = unreachable;
-    }
-
-    multiset<pair<int, pair<int, int>>> q;
-
-    for (int i = 0; i < startingPos.size(); i++)
-    {
-        q.insert(make_pair(0, startingPos[i]));
-        dist[startingPos[i].first][startingPos[i].second] = 0;
-    }
-
-    while (!q.empty())
-    {
-        auto curr = *q.begin();
-        q.erase(q.begin());
-        int currX = curr.second.first;
-        int currY = curr.second.second;
-
-        if (vis[currX][currY] == true)
-            continue;
-
-        vis[currX][currY] = true;
-
-        for (int i = 0; i < 4; i++)
-        {
-            int x = currX + dx[i];
-            int y = currY + dy[i];
-
-            if (getCell(x, y, simpleMap) == outside)
-                continue;
-
-            int cost = (getCell(x, y, simpleMap) == 'y') ? 1 : 2;
-
-            if (dist[x][y] != unreachable && (dist[currX][currY] + cost) < dist[x][y])
-            {
-                dist[x][y] = dist[currX][currY] + cost;
-                q.insert(make_pair(dist[x][y], make_pair(x, y)));
-            }
-        }
-    }
-    return dist;
-}
-
+                                                                        
 vector<pair<int, int>> GameAlgo::getAllposition(string types, vector<vector<char>> &simpleMap)
 {
     vector<pair<int, int>> v;

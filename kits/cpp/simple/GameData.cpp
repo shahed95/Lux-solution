@@ -50,7 +50,6 @@ void GameData::initDistfromDots1()
 
 void GameData::initDistfromDots2()
 {
-
 }
 
 void GameData::initDistfromResource1()
@@ -62,33 +61,49 @@ void GameData::initDistfromResource1()
 void GameData::initDistfromResource2()
 {
     string needResource = (player.researchPoints >= 200) ? "ucw" : ((player.researchPoints >= 50) ? "cw" : "w");
-    
-    auto tempMap = simpleMap;
 
-    for(int i=1; i<tempMap.size()-1 ; i++)
+    auto tempMap = simpleMap;
+    auto oppMap = tempMap;
+
+    for (auto u : opponent.units)
+        oppMap[u.pos.x][u.pos.y] = 'o';
+
+    auto distFromOpponent = GameAlgo::createDistanceArray("o", "yb", oppMap);
+
+    for (int i = 1; i < tempMap.size() - 1; i++)
     {
-        for(int j=1; j<tempMap.size()-1 ; j++)
+        for (int j = 1; j < tempMap.size() - 1; j++)
         {
-            if(tempMap[i][j] != 'c' && tempMap[i][j] != 'u' && tempMap[i][j] != 'w') continue;
+            if (distFromOpponent[i][j] < 10)
+                continue;
+            if (tempMap[i][j] != 'c' && tempMap[i][j] != 'u' && tempMap[i][j] != 'w')
+                continue;
 
             int citycells = 0;
-            if(tempMap[i-1][j] == 'y') citycells++;
-            if(tempMap[i+1][j] == 'y') citycells++;
-            if(tempMap[i][j-1] == 'y') citycells++;
-            if(tempMap[i][j+1] == 'y') citycells++;
+            if (tempMap[i - 1][j] == 'y')
+                citycells++;
+            if (tempMap[i + 1][j] == 'y')
+                citycells++;
+            if (tempMap[i][j - 1] == 'y')
+                citycells++;
+            if (tempMap[i][j + 1] == 'y')
+                citycells++;
 
-            if (citycells >=2)
+            if (citycells >= 2)
             {
                 tempMap[i][j] = 'b';
-                if(tempMap[i-1][j] != 'y') tempMap[i-1][j] = 'b';
-                if(tempMap[i+1][j] != 'y') tempMap[i+1][j] = 'b';
-                if(tempMap[i][j-1] != 'y') tempMap[i][j-1] = 'b';
-                if(tempMap[i][j+1] != 'y') tempMap[i][j+1] = 'b';
+                if (tempMap[i - 1][j] != 'y')
+                    tempMap[i - 1][j] = 'b';
+                if (tempMap[i + 1][j] != 'y')
+                    tempMap[i + 1][j] = 'b';
+                if (tempMap[i][j - 1] != 'y')
+                    tempMap[i][j - 1] = 'b';
+                if (tempMap[i][j + 1] != 'y')
+                    tempMap[i][j + 1] = 'b';
             }
-            
         }
     }
-    
+
     distfromResource = GameAlgo::createDistanceArray(needResource, "zb", tempMap);
 }
 

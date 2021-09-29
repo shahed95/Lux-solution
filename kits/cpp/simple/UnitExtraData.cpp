@@ -49,7 +49,7 @@ void UnitExtraData::updateUnitExtraData(Player &player)
             options.push_back({g->distfromResourceCluster[j].size(), j});
         }
         sort(options.begin(), options.end());
-        if (options.size() != 0 && i % 2 == 1)
+        if (options.size() != 0 && i%2 == 0 && (g->opponent.units.size()) < (g->player.units.size()))
         {
             unit.target = options.back().second;
             mp[unit.target]++;
