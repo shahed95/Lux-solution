@@ -24,6 +24,11 @@ public:
     static DIRECTIONS moveDirection(Unit *unit, vector<vector<int>> &distArray, vector<vector<char>> &simpleMap);
     static pair<int,int> getPosition(int x, int y, DIRECTIONS d);
     static vector<vector<int>> createDistanceArray(string sources, string blocks, vector<vector<char>> &simpleMap);
+    static vector<vector<int>> initDistfromCities(vector<vector<char>>&simpleMap);
+    static vector<vector<int>> initDistfromDots1(vector<vector<char>>&simpleMap);
+    static vector<vector<int>> initDistfromResource1(vector<vector<char>>&simpleMap, string withResource,Player &player, Player &opponent);
+    static vector<vector<int>> initDistfromResource2(vector<vector<char>>&simpleMap, string withResource,Player &player, Player &opponent);
+
 };
 
 #endif

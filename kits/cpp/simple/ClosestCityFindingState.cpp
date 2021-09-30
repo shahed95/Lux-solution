@@ -12,7 +12,6 @@ string ClosestCityFindingState::act()
 
 void ClosestCityFindingState::prepareAct()
 {
-    // probable cases: in city, no city ... 
     auto g = GameData::getInstance();
     auto u = this->unit;
     if(g->player.cityTileCount == 0)

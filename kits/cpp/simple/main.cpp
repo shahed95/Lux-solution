@@ -33,6 +33,16 @@ using namespace lux;
 #include "TargetResourceFindingState.cpp"
 
 
+// Code writing goal
+// 1. easy to extend 2. less modification 3. easy to experiment/adjust
+
+// Gamedata is singleton class where all the data are organised and stored.
+// GameAlgo is static class where all the common algorithms are added.
+
+// Units are stateful
+// Unit's state is declared in UnitExtraData class.
+// each state has its own state class.
+
 
 int main()
 {
@@ -40,6 +50,7 @@ int main()
     // initialize
     gameState.initialize();
     GameData *gameData = GameData::getInstance();
+    
 
     while (true)
     {
@@ -56,14 +67,15 @@ int main()
         {
             for (auto citytiles : city.second.citytiles)
             {
-                if (citytiles.canAct() && unitBuilable > 0)
+                 if (citytiles.canAct() && unitBuilable > 0)
                 {
                     actions.push_back(citytiles.buildWorker());
                     unitBuilable--;
                 }
-                else if (citytiles.canAct())
+                else if (citytiles.canAct() && gameData->player.researchPoints<200)
                 {
                     actions.push_back(citytiles.research());
+                    gameData->tilesReasearchRate++;
                 }
             }
         }
@@ -78,13 +90,8 @@ int main()
             actions.push_back(Annotate::sidetext(unit.id + unit.getStateName()));
         }
 
-        // -------------------------------------------------------------------------------------------------------//
-        // you can add debug annotations using the methods of the Annotate class.
-        // actions.push_back(Annotate::circle(0, 0));
+        //3. API code
 
-        /** AI Code Goes Above! **/
-
-        /** Do not edit! **/
         for (int i = 0; i < actions.size(); i++)
         {
             if (i != 0)
@@ -92,7 +99,6 @@ int main()
             cout << actions[i];
         }
         cout << endl;
-        // end turn
         UnitExtraData::backupUnitExtraData(gameData->player);
         gameState.end_turn();
     }

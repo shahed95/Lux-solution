@@ -13,15 +13,11 @@ void TargetResourceFindingState::prepareAct()
     auto g = GameData::getInstance();
     auto u = this->unit;
 
-    if (g->distfromResourceCluster[u->target][u->pos.x][u->pos.y] == 0 || g->resourceClusters[u->target].cells.size() == 0)
+    if (g->distfromResourceCluster[u->target][u->pos.x][u->pos.y] <=1 || g->resourceClusters[u->target].cells.size() == 0)
     {
         u->target = -1;
         u->TransitionTo(new ClosestCityFindingState());
         u->prepare_act();
         return;
     }
-    // if(u->canBuild(g->gameMap))
-    // {
-    //     u->TransitionTo(new BuildCityState());
-    // }
 }

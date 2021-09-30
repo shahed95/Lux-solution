@@ -14,11 +14,11 @@ void ClosestBuildSpaceFindingState::prepareAct()
 {
     auto g = GameData::getInstance();
     auto u = this->unit;
-    if(u->getCargoSpaceLeft()!=0) // somehow lost resource
+    if(u->getCargoSpaceLeft()!=0)
     {
         u->TransitionTo(new ClosestResourceFindingState());
     }
-    else if(GameAlgo::getCell(u->pos.x, u->pos.y, g->simpleMap) == '.') // builable
+    else if(GameAlgo::getCell(u->pos.x, u->pos.y, g->simpleMap) == '.')
     {
         this->unit->TransitionTo(new BuildCityState());
     }

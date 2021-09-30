@@ -21,6 +21,14 @@ void ClosestResourceFindingState::prepareAct()
     auto g = GameData::getInstance();
     auto u = this->unit;
 
+    int dayleft = 30 - (g->gameState.turn % 40);
+
+    if(dayleft <=1 && g->distfromCities[u->pos.x][u->pos.y] <= 2)
+    {
+        u->TransitionTo(new ClosestCityFindingState());
+        return;
+    }
+
     if (u->getCargoSpaceLeft() == 0) // success
     {
         if (GameAlgo::getCell(u->pos.x, u->pos.y, g->simpleMap) == '.')
