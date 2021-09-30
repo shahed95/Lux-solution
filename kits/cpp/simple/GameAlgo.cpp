@@ -124,19 +124,19 @@ vector<pair<int, int>> GameAlgo::getAllposition(string types, vector<vector<char
 
 DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, vector<vector<char>> &simpleMap)
 {
-    int DX[] = {0, 0, -1, 1, 0};
-    int DY[] = {1, -1, 0, 0, 0};
-    DIRECTIONS D[] = {SOUTH, NORTH, WEST, EAST, CENTER};
+    int DX[] = {0, 0, 0, -1, 1};
+    int DY[] = {0, 1, -1, 0, 0};
+    DIRECTIONS D[] = {CENTER, SOUTH, NORTH, WEST, EAST};
 
-    int closestDist = unvisited;
+    int closestDist = unvisited + 10;
     DIRECTIONS closestDirection = CENTER;
-    int closestX = -1, closestY = -1;
+    int closestX = 0, closestY = 0;
 
     vector<int> options;
     for (int i = 0; i < 5; i++)
         options.push_back(i);
     random_shuffle(options.begin(), options.end());
-
+    auto g = GameData::getInstance();
     for (auto i : options)
     {
         int goX = unit->pos.x + DX[i];
@@ -150,6 +150,15 @@ DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, v
             {
                 closestDist = distArray[goX][goY];
                 closestDirection = D[i];
+                closestX = goX;
+                closestY = goY;
+            }
+            else if (distArray[goX][goY] == closestDist && g->distfromResource[goX][goY] < g->distfromResource[closestX][closestY])
+            {
+                closestDist = distArray[goX][goY];
+                closestDirection = D[i];
+                closestX = goX;
+                closestY = goY;
             }
         }
     }
@@ -206,7 +215,7 @@ vector<vector<int>> GameAlgo::initDistfromResource2(vector<vector<char>> &simple
     {
         for (int j = 1; j < tempMap.size() - 1; j++)
         {
-            if (distFromOpponent[i][j] < 10)
+            if (distFromOpponent[i][j] < 10 && player.cities.size() >= 2)
                 continue;
             if (tempMap[i][j] != 'c' && tempMap[i][j] != 'u' && tempMap[i][j] != 'w')
                 continue;
@@ -218,7 +227,7 @@ vector<vector<int>> GameAlgo::initDistfromResource2(vector<vector<char>> &simple
             for (auto u : dir)
                 cnt[tempMap[u.first + i][u.second + j]]++;
 
-            if (cnt['y']>=2)
+            if (cnt['y'] >= 2)
             {
                 tempMap[i][j] = 'b';
                 if (tempMap[i - 1][j] != 'y')
