@@ -15,7 +15,7 @@ namespace lux
         int uranium = 0;
         Cargo(){};
     };
-    
+
     class Unit;
 
     class UnitState
@@ -32,6 +32,7 @@ namespace lux
         virtual string act() = 0;
         virtual void prepareAct() = 0;
         virtual string stateName() = 0;
+        virtual int getPriority() = 0;
     };
 
     class Unit
@@ -77,7 +78,7 @@ namespace lux
         {
             return this->unitState->stateName();
         }
-        UnitState* getState()
+        UnitState *getState()
         {
             return this->unitState;
         }
@@ -92,6 +93,10 @@ namespace lux
         bool isCart() const
         {
             return this->type == 1;
+        }
+        int getSpaceUsed() const
+        {
+            return this->cargo.wood + this->cargo.coal + this->cargo.uranium;
         }
         int getCargoSpaceLeft() const
         {
@@ -159,8 +164,6 @@ namespace lux
             return "p " + this->id;
         }
     };
-
-    
 
     class Player
     {

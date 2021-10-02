@@ -18,7 +18,6 @@ using namespace lux;
 #include "ClosestBuildSpaceFindingState.hpp"
 #include "BuildCityState.hpp"
 #include "UnitExtraData.hpp"
-#include "InsideCityState.hpp"
 #include "TargetResourceFindingState.hpp"
 
 #include "GameData.cpp"
@@ -29,9 +28,7 @@ using namespace lux;
 #include "BuildCityState.cpp"
 #include "UnitExtraData.cpp"
 #include "Cluster.cpp"
-#include "InsideCityState.cpp"
 #include "TargetResourceFindingState.cpp"
-
 
 // Code writing goal
 // 1. easy to extend 2. less modification 3. easy to experiment/adjust
@@ -43,6 +40,9 @@ using namespace lux;
 // Unit's state is declared in UnitExtraData class.
 // each state has its own state class.
 
+// some unit have one target : usually the closest target
+// some unit have two target : first target(intermidiate) and second(main) target
+// some unit which target for bigger cluster go there via an intermidiate cluster
 
 int main()
 {
@@ -50,7 +50,6 @@ int main()
     // initialize
     gameState.initialize();
     GameData *gameData = GameData::getInstance();
-    
 
     while (true)
     {
@@ -67,12 +66,12 @@ int main()
         {
             for (auto citytiles : city.second.citytiles)
             {
-                 if (citytiles.canAct() && unitBuilable > 0)
+                if (citytiles.canAct() && unitBuilable > 0)
                 {
                     actions.push_back(citytiles.buildWorker());
                     unitBuilable--;
                 }
-                else if (citytiles.canAct() && gameData->player.researchPoints<200)
+                else if (citytiles.canAct() && gameData->player.researchPoints < 200)
                 {
                     actions.push_back(citytiles.research());
                     gameData->tilesReasearchRate++;
@@ -81,10 +80,20 @@ int main()
         }
 
         //2. Unit AI
+
+        vector<pair<int, int>> temp;
         for (int i = 0; i < gameData->player.units.size(); i++)
         {
             Unit &unit = gameData->player.units[i];
-            unit.prepare_act();
+            temp.push_back({unit.getState()->getPriority() , i});
+        }
+
+        sort(temp.begin(), temp.end());
+
+        for (int i = 0; i < gameData->player.units.size(); i++)
+        {
+            Unit &unit = gameData->player.units[i];
+            
             if (unit.canAct())
                 actions.push_back(unit.act());
             actions.push_back(Annotate::sidetext(unit.id + unit.getStateName()));

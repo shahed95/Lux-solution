@@ -21,14 +21,16 @@ public:
     static vector<vector<int>> bfsOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos, vector<vector<char>> &simpleMap);
     static vector<vector<int>> dijkstraOnMap(vector<pair<int, int>> startingPos, vector<pair<int, int>> unreachablePos, vector<vector<char>> &simpleMap);
     static vector<pair<int, int>> getAllposition(string type, vector<vector<char>> &simpleMap);
-    static DIRECTIONS moveDirection(Unit *unit, vector<vector<int>> &distArray, vector<vector<char>> &simpleMap);
+    static DIRECTIONS moveDirection(Unit *unit, vector<vector<int>> &distArray, vector<vector<int>> &secondDistArray, vector<vector<char>> &simpleMap);
     static pair<int,int> getPosition(int x, int y, DIRECTIONS d);
     static vector<vector<int>> createDistanceArray(string sources, string blocks, vector<vector<char>> &simpleMap);
-    static vector<vector<int>> initDistfromCities(vector<vector<char>>&simpleMap);
-    static vector<vector<int>> initDistfromDots1(vector<vector<char>>&simpleMap);
-    static vector<vector<int>> initDistfromResource1(vector<vector<char>>&simpleMap, string withResource,Player &player, Player &opponent);
-    static vector<vector<int>> initDistfromResource2(vector<vector<char>>&simpleMap, string withResource,Player &player, Player &opponent);
-
+    static vector<vector<int>> makeDistfromCities(vector<vector<char>>&simpleMap);
+    static vector<vector<int>> makeDistfromDots1(vector<vector<char>>&simpleMap);
+    static vector<vector<int>> makeDistfromResource1(vector<vector<char>>&simpleMap, string withResource,Player &player, Player &opponent);
+    static vector<vector<int>> makeDistfromResource2(vector<vector<char>>&simpleMap, string withResource,Player &player, Player &opponent);
+    static vector<vector<int>> makeDistfromPlayer(vector<vector<char>>&simpleMap, Player &player);
+    static vector<vector<int>> makeDistfromOpponent(vector<vector<char>>&simpleMap, Player &player);
+    static vector<vector<int>> makeDistfromGoodDots(vector<vector<char>> &simpleMap);
 };
 
 #endif

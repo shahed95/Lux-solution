@@ -24,8 +24,11 @@ public:
     vector<vector<char>> simpleMap;
     vector<vector<int>> distfromCities;
     vector<vector<int>> distfromDots;
+    vector<vector<int>> distfromDotsNeg;
     vector<vector<int>> distfromResource;
-
+    vector<vector<int>> distfromPlayer;
+    vector<vector<int>> distfromOpponent;
+    vector<vector<int>> distfromGoodDots;
     vector<Cluster> resourceClusters;
     vector<vector<vector<int>>> distfromResourceCluster;
 

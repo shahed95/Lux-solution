@@ -122,7 +122,7 @@ vector<pair<int, int>> GameAlgo::getAllposition(string types, vector<vector<char
     return v;
 }
 
-DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, vector<vector<char>> &simpleMap)
+DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, vector<vector<int>> &secondDistArray, vector<vector<char>> &simpleMap)
 {
     int DX[] = {0, 0, 0, -1, 1};
     int DY[] = {0, 1, -1, 0, 0};
@@ -136,7 +136,6 @@ DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, v
     for (int i = 0; i < 5; i++)
         options.push_back(i);
     random_shuffle(options.begin(), options.end());
-    auto g = GameData::getInstance();
     for (auto i : options)
     {
         int goX = unit->pos.x + DX[i];
@@ -153,7 +152,7 @@ DIRECTIONS GameAlgo::moveDirection(Unit *unit, vector<vector<int>> &distArray, v
                 closestX = goX;
                 closestY = goY;
             }
-            else if (distArray[goX][goY] == closestDist && g->distfromResource[goX][goY] < g->distfromResource[closestX][closestY])
+            else if (distArray[goX][goY] == closestDist && secondDistArray[goX][goY] < secondDistArray[closestX][closestY])
             {
                 closestDist = distArray[goX][goY];
                 closestDirection = D[i];
@@ -181,35 +180,55 @@ pair<int, int> GameAlgo::getPosition(int x, int y, DIRECTIONS d)
     }
 }
 
-vector<vector<int>> GameAlgo::initDistfromCities(vector<vector<char>> &simpleMap)
+vector<vector<int>> GameAlgo::makeDistfromCities(vector<vector<char>> &simpleMap)
 {
     return createDistanceArray("y", "zb", simpleMap);
 }
 
-vector<vector<int>> GameAlgo::initDistfromDots1(vector<vector<char>> &simpleMap)
+vector<vector<int>> GameAlgo::makeDistfromDots1(vector<vector<char>> &simpleMap)
 {
     return createDistanceArray(".", "yzb", simpleMap);
 }
 
-vector<vector<int>> GameAlgo::initDistfromResource1(vector<vector<char>> &simpleMap, string withResource, Player &player, Player &opponent)
+vector<vector<int>> GameAlgo::makeDistfromGoodDots(vector<vector<char>> &simpleMap)
+{
+    vector<pair<int, int>> pos;
+    for (int i = 1; i < simpleMap.size() - 1; i++)
+    {
+        for (int j = 1; j < simpleMap.size() - 1; j++)
+        {
+            if (simpleMap[i][j] != '.')
+                continue;
+
+            map<char, int> cnt;
+            pair<int, int> dir[] = {{0, 0}, {0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+
+            for (auto d : dir)
+                cnt[simpleMap[d.first + i][d.second + j]]++;
+
+            if (cnt['w'] + cnt['c'] + cnt['u'] >= 2)
+            {
+                pos.push_back({i, j});
+            }
+            else if (cnt['y'] >= 2)
+            {
+                pos.push_back({i, j});
+            }
+        }
+    }
+    return bfsOnMap(pos, getAllposition("yzb", simpleMap), simpleMap);
+}
+
+vector<vector<int>> GameAlgo::makeDistfromResource1(vector<vector<char>> &simpleMap, string withResource, Player &player, Player &opponent)
 {
     return createDistanceArray(withResource, "zb", simpleMap);
 }
 
-vector<vector<int>> GameAlgo::initDistfromResource2(vector<vector<char>> &simpleMap, string withResource, Player &player, Player &opponent)
+vector<vector<int>> GameAlgo::makeDistfromResource2(vector<vector<char>> &simpleMap, string withResource, Player &player, Player &opponent)
 {
     auto tempMap = simpleMap;
-    auto oppMap = tempMap;
-    auto myMap = tempMap;
-
-    for (auto u : opponent.units)
-        oppMap[u.pos.x][u.pos.y] = 'o';
-
-    for (auto u : player.units)
-        myMap[u.pos.x][u.pos.y] = 'm';
-
-    auto distFromOpponent = createDistanceArray("o", "yb", oppMap);
-    auto distFromMyUnit = createDistanceArray("m", "zb", myMap);
+    auto distFromOpponent = makeDistfromOpponent(simpleMap, opponent);
+    auto distFromMyUnit = makeDistfromPlayer(simpleMap, player);
 
     for (int i = 1; i < tempMap.size() - 1; i++)
     {
@@ -217,30 +236,45 @@ vector<vector<int>> GameAlgo::initDistfromResource2(vector<vector<char>> &simple
         {
             if (distFromOpponent[i][j] < 10 && player.cities.size() >= 2)
                 continue;
-            if (tempMap[i][j] != 'c' && tempMap[i][j] != 'u' && tempMap[i][j] != 'w')
+            if (withResource.find(tempMap[i][j]) == std::string::npos)
                 continue;
 
             int citycells = 0;
             map<char, int> cnt;
-            pair<int, int> dir[] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+            pair<int, int> dir[] = {{0, 0}, {0, 1}, {0, -1}, {-1, 0}, {1, 0}};
 
-            for (auto u : dir)
-                cnt[tempMap[u.first + i][u.second + j]]++;
+            for (auto d : dir)
+                cnt[tempMap[d.first + i][d.second + j]]++;
 
             if (cnt['y'] >= 2)
             {
-                tempMap[i][j] = 'b';
-                if (tempMap[i - 1][j] != 'y')
-                    tempMap[i - 1][j] = 'b';
-                if (tempMap[i + 1][j] != 'y')
-                    tempMap[i + 1][j] = 'b';
-                if (tempMap[i][j - 1] != 'y')
-                    tempMap[i][j - 1] = 'b';
-                if (tempMap[i][j + 1] != 'y')
-                    tempMap[i][j + 1] = 'b';
+                for (auto u : dir)
+                {
+                    if (tempMap[u.first + i][u.second + j] != 'y')
+                        tempMap[u.first + i][u.second + j] = 'b';
+                }
             }
         }
     }
-
     return createDistanceArray(withResource, "zyb", tempMap);
+}
+
+vector<vector<int>> GameAlgo::makeDistfromPlayer(vector<vector<char>> &simpleMap, Player &player)
+{
+    auto playerMap = simpleMap;
+
+    for (auto u : player.units)
+        playerMap[u.pos.x][u.pos.y] = 'm';
+
+    return createDistanceArray("m", "zb", playerMap);
+}
+
+vector<vector<int>> GameAlgo::makeDistfromOpponent(vector<vector<char>> &simpleMap, Player &opponent)
+{
+    auto opponentMap = simpleMap;
+
+    for (auto u : opponent.units)
+        opponentMap[u.pos.x][u.pos.y] = 'o';
+
+    return createDistanceArray("o", "yb", opponentMap);
 }

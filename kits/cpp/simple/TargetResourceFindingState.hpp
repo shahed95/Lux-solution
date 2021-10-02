@@ -12,5 +12,6 @@ public:
     {
         return "TargetResourceFindingState";
     }
+    int getPriority() override;
 };
 #endif

@@ -15,3 +15,8 @@ void BuildCityState::prepareAct()
     if (u->getCargoSpaceLeft() != 0)
         u->TransitionTo(new ClosestResourceFindingState());
 }
+
+int BuildCityState::getPriority() 
+{
+    return 0;
+}

@@ -12,5 +12,6 @@ public:
     {
         return "ClosestCityFindingState";
     }
+    int getPriority() override;
 };
 #endif

@@ -12,5 +12,6 @@ public:
     {
         return "ClosestBuildSpaceFindingState";
     }
+    int getPriority() override;
 };
 #endif

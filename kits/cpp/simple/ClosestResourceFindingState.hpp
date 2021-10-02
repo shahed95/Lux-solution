@@ -11,6 +11,7 @@ public:
     {
         return "ClosestResourceFindingState";
     }
+    int getPriority() override;
 };
 
 #endif

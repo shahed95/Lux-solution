@@ -21,7 +21,6 @@ void UnitExtraData::updateUnitExtraData(Player &player)
             continue;
         unit.TransitionTo(backup[unit.id].getState());
         unit.target = backup[unit.id].target;
-
         if (unit.getStateName() == "TargetResourceFindingState")
         {
             targeted[unit.target]++;
@@ -32,6 +31,7 @@ void UnitExtraData::updateUnitExtraData(Player &player)
             if (v.size() != 0)
                 targeted[v[0]]++;
         }
+        unit.prepare_act();
     }
 
     // 2. initialize data
@@ -45,7 +45,7 @@ void UnitExtraData::updateUnitExtraData(Player &player)
         int dayLeft = 30 - (g->gameState.turn % 40);
 
         order = closestClusterOrder(unit.pos.x, unit.pos.y, (dayLeft / 2) - 6);
-        
+
         if (i % 2 == 1 && g->player.cityTileCount > g->opponent.cityTileCount)
             order = largestClusterOrder(unit.pos.x, unit.pos.y, (dayLeft / 2) - 6);
 
@@ -64,6 +64,48 @@ void UnitExtraData::updateUnitExtraData(Player &player)
         {
             unit.TransitionTo(new ClosestResourceFindingState());
         }
+
+        unit.prepare_act();
+    }
+
+    //pull from cluster
+    if (g->gameState.turn != 25 && g->gameState.turn != 65)
+        return;
+
+    auto order = largestClusterOrder(0, 0, 999999);
+
+    for (int i = 0; i < order.size(); i++)
+    {
+        auto c = order[i];
+        if (targeted[c] != 0)
+            continue;
+        int distFromClosestUnit = 999999;
+        int selected = -1;
+
+        for (int j = 0; j < g->player.units.size(); j++)
+        {
+            auto &unit = g->player.units[j];
+
+            if (unit.getSpaceUsed() < 50)
+                continue;
+
+            auto dist = g->distfromResourceCluster[c][unit.pos.x][unit.pos.y];
+
+            if (dist < distFromClosestUnit)
+            {
+                distFromClosestUnit = dist;
+                selected = j;
+            }
+        }
+        if (selected != -1)
+        {
+            auto &unit = g->player.units[selected];
+            unit.TransitionTo(new TargetResourceFindingState());
+            unit.target = c;
+            unit.prepare_act();
+            targeted[c]++;
+            break;
+        }
     }
 }
 
@@ -75,7 +117,8 @@ vector<int> UnitExtraData::closestClusterOrder(int x, int y, int lim)
     for (int i = 0; i < g->distfromResourceCluster.size(); i++)
     {
         auto cluster = g->resourceClusters[i];
-        if(cluster.islocked==1) continue;
+        if (cluster.islocked == 1)
+            continue;
         auto distArray = g->distfromResourceCluster[i];
         if (distArray[x][y] > lim)
             continue;
@@ -97,7 +140,8 @@ vector<int> UnitExtraData::largestClusterOrder(int x, int y, int lim)
     for (int i = 0; i < g->resourceClusters.size(); i++)
     {
         auto cluster = g->resourceClusters[i];
-        if(cluster.islocked==1) continue;
+        if (cluster.islocked == 1)
+            continue;
         auto distArray = g->distfromResourceCluster[i];
         if (distArray[x][y] > lim)
             continue;

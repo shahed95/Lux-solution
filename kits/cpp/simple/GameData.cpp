@@ -33,10 +33,23 @@ void GameData::updateGameData(kit::Agent gameState)
     // create "distance from target" arrays which will help units to decide which cell to move
     string withResource = (player.researchPoints >= 180) ? "ucw" : ((player.researchPoints >= 40) ? "cw" : "w");
     
-    distfromCities = GameAlgo::initDistfromCities(simpleMap);
-    distfromResource = GameAlgo::initDistfromResource2(simpleMap,withResource,player,opponent);
-    distfromDots = GameAlgo::initDistfromDots1(simpleMap);
-    
+    distfromCities = GameAlgo::makeDistfromCities(simpleMap);
+    distfromResource = GameAlgo::makeDistfromResource2(simpleMap,withResource,player,opponent);
+    distfromDots = GameAlgo::makeDistfromDots1(simpleMap);
+    distfromGoodDots = GameAlgo::makeDistfromGoodDots(simpleMap);
+    distfromPlayer = GameAlgo::makeDistfromPlayer(simpleMap,player);
+    distfromOpponent = GameAlgo::makeDistfromOpponent(simpleMap,opponent);
+
+    distfromDotsNeg = distfromDots;
+    for(int i=0; i<distfromDotsNeg.size(); i++)
+    {
+        for(int j=0; j<distfromDotsNeg.size(); j++)
+        {
+            distfromDotsNeg[i][j] *=-1;
+        }
+    }
+
+ 
     updateCluster();
 }
 
