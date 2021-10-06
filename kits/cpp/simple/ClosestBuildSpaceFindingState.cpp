@@ -29,5 +29,5 @@ int ClosestBuildSpaceFindingState::getPriority()
 {
     auto g = GameData::getInstance();
     auto u = this->unit;
-    return g->distfromDots[u->pos.x][u->pos.y] - 100000;
+    return 0;
 }

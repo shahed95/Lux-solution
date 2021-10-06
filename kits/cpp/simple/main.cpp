@@ -90,10 +90,16 @@ int main()
 
         sort(temp.begin(), temp.end());
 
-        for (int i = 0; i < gameData->player.units.size(); i++)
+        for (auto i:temp)
         {
-            Unit &unit = gameData->player.units[i];
-            
+            Unit &unit = gameData->player.units[i.second];
+            if (!unit.canAct() && gameData->simpleMap[unit.pos.x][unit.pos.y]!='y')
+                gameData->simpleMap[unit.pos.x][unit.pos.y] = 'b';
+        }
+
+        for (auto i:temp)
+        {
+            Unit &unit = gameData->player.units[i.second];
             if (unit.canAct())
                 actions.push_back(unit.act());
             actions.push_back(Annotate::sidetext(unit.id + unit.getStateName()));

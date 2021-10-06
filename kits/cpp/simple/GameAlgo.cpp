@@ -29,18 +29,6 @@ vector<vector<char>> GameAlgo::createSimpleMap(GameMap &gameMap, Player &player,
             simpleMap[citytiles.pos.x][citytiles.pos.y] = 'z';
     }
 
-    for (auto &unit : player.units)
-    {
-        if (!unit.canAct() && simpleMap[unit.pos.x][unit.pos.y] == '.')
-            simpleMap[unit.pos.x][unit.pos.y] = 'b';
-    }
-
-    for (auto &unit : opponent.units)
-    {
-        if (!unit.canAct() && simpleMap[unit.pos.x][unit.pos.y] == '.')
-            simpleMap[unit.pos.x][unit.pos.y] = 'b';
-    }
-
     return simpleMap;
 }
 
@@ -185,7 +173,7 @@ vector<vector<int>> GameAlgo::makeDistfromCities(vector<vector<char>> &simpleMap
     return createDistanceArray("y", "zb", simpleMap);
 }
 
-vector<vector<int>> GameAlgo::makeDistfromDots1(vector<vector<char>> &simpleMap)
+vector<vector<int>> GameAlgo::makeDistfromDots(vector<vector<char>> &simpleMap)
 {
     return createDistanceArray(".", "yzb", simpleMap);
 }
@@ -219,12 +207,7 @@ vector<vector<int>> GameAlgo::makeDistfromGoodDots(vector<vector<char>> &simpleM
     return bfsOnMap(pos, getAllposition("yzb", simpleMap), simpleMap);
 }
 
-vector<vector<int>> GameAlgo::makeDistfromResource1(vector<vector<char>> &simpleMap, string withResource, Player &player, Player &opponent)
-{
-    return createDistanceArray(withResource, "zb", simpleMap);
-}
-
-vector<vector<int>> GameAlgo::makeDistfromResource2(vector<vector<char>> &simpleMap, string withResource, Player &player, Player &opponent)
+vector<vector<int>> GameAlgo::makeDistfromResource(vector<vector<char>> &simpleMap, string withResource, Player &player, Player &opponent)
 {
     auto tempMap = simpleMap;
     auto distFromOpponent = makeDistfromOpponent(simpleMap, opponent);

@@ -117,7 +117,7 @@ vector<int> UnitExtraData::closestClusterOrder(int x, int y, int lim)
     for (int i = 0; i < g->distfromResourceCluster.size(); i++)
     {
         auto cluster = g->resourceClusters[i];
-        if (cluster.islocked == 1)
+        if (cluster.takable == 0)
             continue;
         auto distArray = g->distfromResourceCluster[i];
         if (distArray[x][y] > lim)
@@ -140,7 +140,7 @@ vector<int> UnitExtraData::largestClusterOrder(int x, int y, int lim)
     for (int i = 0; i < g->resourceClusters.size(); i++)
     {
         auto cluster = g->resourceClusters[i];
-        if (cluster.islocked == 1)
+        if (cluster.takable == 0)
             continue;
         auto distArray = g->distfromResourceCluster[i];
         if (distArray[x][y] > lim)

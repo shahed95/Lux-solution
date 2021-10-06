@@ -46,5 +46,5 @@ int ClosestResourceFindingState::getPriority()
 {
     auto g = GameData::getInstance();
     auto u = this->unit;
-    return g->distfromResource[u->pos.x][u->pos.y];
+    return 0;
 }

@@ -5,7 +5,7 @@ Cluster::Cluster(vector<vector<char>> simpleMap, char _type, pair<int, int> sour
     int dy[] = {1, -1, 0, 0, 1, -1, 1, -1};
     startpos = sourcePos;
     this->type = _type;
-    this->islocked = 0;
+    takable = 0;
 
     queue<pair<int, int>> q;
     q.push(sourcePos);
@@ -32,8 +32,11 @@ Cluster::Cluster(vector<vector<char>> simpleMap, char _type, pair<int, int> sour
     }
 }
 
-void Cluster::updateCluster(vector<vector<char>> &simpleMap)
+void Cluster::updateCluster(vector<vector<char>> &simpleMap, string takableResource)
 {
+    if (takableResource.find(this->type) != string::npos)
+        this->takable = 1;
+
     for (int i = 0; i < cells.size(); i++)
     {
         if (simpleMap[cells[i].first][cells[i].second] == '.')

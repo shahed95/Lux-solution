@@ -20,7 +20,7 @@ public:
     Player player;
     Player opponent;
     GameMap gameMap;
-
+    string takableResource;
     vector<vector<char>> simpleMap;
     vector<vector<int>> distfromCities;
     vector<vector<int>> distfromDots;
@@ -34,6 +34,8 @@ public:
 
     static GameData *getInstance();
     void updateGameData(kit::Agent gameState);
-    void updateCluster();
+    void updateTakableResource();
+    void updateClusters();
+    void initClusters();
 };
 #endif

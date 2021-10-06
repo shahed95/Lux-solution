@@ -28,5 +28,5 @@ int ClosestCityFindingState::getPriority()
 {
     auto g = GameData::getInstance();
     auto u = this->unit;
-    return g->distfromCities[u->pos.x][u->pos.y];
+    return 0;
 }

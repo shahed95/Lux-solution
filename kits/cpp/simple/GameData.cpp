@@ -31,15 +31,14 @@ void GameData::updateGameData(kit::Agent gameState)
     simpleMap = GameAlgo::createSimpleMap(gameMap, player, opponent);
 
     // create "distance from target" arrays which will help units to decide which cell to move
-    string withResource = (player.researchPoints >= 180) ? "ucw" : ((player.researchPoints >= 40) ? "cw" : "w");
-    
-    distfromCities = GameAlgo::makeDistfromCities(simpleMap);
-    distfromResource = GameAlgo::makeDistfromResource2(simpleMap,withResource,player,opponent);
-    distfromDots = GameAlgo::makeDistfromDots1(simpleMap);
-    distfromGoodDots = GameAlgo::makeDistfromGoodDots(simpleMap);
-    distfromPlayer = GameAlgo::makeDistfromPlayer(simpleMap,player);
-    distfromOpponent = GameAlgo::makeDistfromOpponent(simpleMap,opponent);
+    updateTakableResource();
 
+    distfromCities = GameAlgo::makeDistfromCities(simpleMap);
+    distfromResource = GameAlgo::makeDistfromResource(simpleMap, takableResource, player, opponent);
+    distfromDots = GameAlgo::makeDistfromDots(simpleMap);
+    distfromGoodDots = GameAlgo::makeDistfromGoodDots(simpleMap);
+    distfromPlayer = GameAlgo::makeDistfromPlayer(simpleMap, player);
+    distfromOpponent = GameAlgo::makeDistfromOpponent(simpleMap, opponent);
     distfromDotsNeg = distfromDots;
     for(int i=0; i<distfromDotsNeg.size(); i++)
     {
@@ -48,45 +47,50 @@ void GameData::updateGameData(kit::Agent gameState)
             distfromDotsNeg[i][j] *=-1;
         }
     }
+    if (gameState.turn == 0)
+        initClusters();
 
- 
-    updateCluster();
+    updateClusters();
 }
 
-
-
-void GameData::updateCluster()
+void GameData::updateTakableResource()
 {
     if (gameState.turn == 0)
-    {
-        vector<vector<char>> tempMap = simpleMap;
+        takableResource += "w";
+    if (takableResource.size() == 1 && player.researchPoints >= 40)
+        takableResource += "c";
+    if (takableResource.size() == 2 && player.researchPoints >= 180)
+        takableResource += "u";
+}
 
-        string resourceOrder = "wcu";
-        for (auto r : resourceOrder)
+void GameData::initClusters()
+{
+    vector<vector<char>> tempMap = simpleMap;
+
+    string resourceOrder = "wcu";
+    for (auto r : resourceOrder)
+    {
+        for (int i = 0; i < tempMap.size(); i++)
         {
-            for (int i = 0; i < tempMap.size(); i++)
+            for (int j = 0; j < tempMap[i].size(); j++)
             {
-                for (int j = 0; j < tempMap[i].size(); j++)
+                if (tempMap[i][j] == r)
                 {
-                    if (tempMap[i][j] == r)
-                    {
-                        resourceClusters.push_back(Cluster(tempMap, tempMap[i][j], {i, j}));
-                        for (auto u : resourceClusters.back().cells)
-                            tempMap[u.first][u.second] = '.';
-                    }
+                    resourceClusters.push_back(Cluster(tempMap, tempMap[i][j], {i, j}));
+                    for (auto u : resourceClusters.back().cells)
+                        tempMap[u.first][u.second] = '.';
                 }
             }
         }
-        distfromResourceCluster.resize(resourceClusters.size());
     }
+    distfromResourceCluster.resize(resourceClusters.size());
+}
 
+void GameData::updateClusters()
+{
     for (int i = 0; i < resourceClusters.size(); i++)
     {
-        resourceClusters[i].updateCluster(gameData->simpleMap);
+        resourceClusters[i].updateCluster(gameData->simpleMap, takableResource);
         distfromResourceCluster[i] = GameAlgo::bfsOnMap(resourceClusters[i].cells, GameAlgo::getAllposition("zyb", simpleMap), simpleMap);
-        if (resourceClusters[i].type == 'c')
-            resourceClusters[i].islocked = (player.researchPoints >= 40) ? 0 : 1;
-        if (resourceClusters[i].type == 'u')
-            resourceClusters[i].islocked = (player.researchPoints >= 180) ? 0 : 1;
     }
 }

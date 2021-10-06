@@ -26,5 +26,5 @@ int TargetResourceFindingState::getPriority()
 {
     auto g = GameData::getInstance();
     auto u = this->unit;
-    return g->distfromResourceCluster[u->target][u->pos.x][u->pos.y];
+    return 0;
 }
