@@ -29,11 +29,13 @@ void GameData::updateGameData(kit::Agent gameState)
 
     // create a simplified game map with resource, city, and blocked cells
     simpleMap = GameAlgo::createSimpleMap(gameMap, player, opponent);
+    unitMap = GameAlgo::createUnitMap(gameMap,player,opponent);
 
     // create "distance from target" arrays which will help units to decide which cell to move
     updateTakableResource();
 
-    distfromCities = GameAlgo::makeDistfromCities(simpleMap);
+    distfromCities = GameAlgo::makeDistfromCities(simpleMap,false);
+    distfromOpponentCities = GameAlgo::makeDistfromCities(simpleMap,true);
     distfromResource = GameAlgo::makeDistfromResource(simpleMap, takableResource, player, opponent);
     distfromDots = GameAlgo::makeDistfromDots(simpleMap);
     distfromGoodDots = GameAlgo::makeDistfromGoodDots(simpleMap);
@@ -59,7 +61,7 @@ void GameData::updateTakableResource()
         takableResource += "w";
     if (takableResource.size() == 1 && player.researchPoints >= 40)
         takableResource += "c";
-    if (takableResource.size() == 2 && player.researchPoints >= 180)
+    if (takableResource.size() == 2 && player.researchPoints >= 160)
         takableResource += "u";
 }
 
@@ -90,7 +92,7 @@ void GameData::updateClusters()
 {
     for (int i = 0; i < resourceClusters.size(); i++)
     {
-        resourceClusters[i].updateCluster(gameData->simpleMap, takableResource);
+        resourceClusters[i].updateCluster(gameData->simpleMap, gameData->unitMap, takableResource);
         distfromResourceCluster[i] = GameAlgo::bfsOnMap(resourceClusters[i].cells, GameAlgo::getAllposition("zyb", simpleMap), simpleMap);
     }
 }

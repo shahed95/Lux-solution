@@ -19,6 +19,7 @@ using namespace lux;
 #include "BuildCityState.hpp"
 #include "UnitExtraData.hpp"
 #include "TargetResourceFindingState.hpp"
+#include "OppositionAttackState.hpp"
 
 #include "GameData.cpp"
 #include "GameAlgo.cpp"
@@ -29,7 +30,7 @@ using namespace lux;
 #include "UnitExtraData.cpp"
 #include "Cluster.cpp"
 #include "TargetResourceFindingState.cpp"
-
+#include "OppositionAttackState.cpp"
 // Code writing goal
 // 1. easy to extend 2. less modification 3. easy to experiment/adjust
 

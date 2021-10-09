@@ -22,7 +22,9 @@ public:
     GameMap gameMap;
     string takableResource;
     vector<vector<char>> simpleMap;
+    vector<vector<char>> unitMap;
     vector<vector<int>> distfromCities;
+    vector<vector<int>> distfromOpponentCities;
     vector<vector<int>> distfromDots;
     vector<vector<int>> distfromDotsNeg;
     vector<vector<int>> distfromResource;

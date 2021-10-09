@@ -6,6 +6,8 @@ Cluster::Cluster(vector<vector<char>> simpleMap, char _type, pair<int, int> sour
     startpos = sourcePos;
     this->type = _type;
     takable = 0;
+    myUnitCount = 0;
+    opUnitCount = 0;
 
     queue<pair<int, int>> q;
     q.push(sourcePos);
@@ -32,10 +34,13 @@ Cluster::Cluster(vector<vector<char>> simpleMap, char _type, pair<int, int> sour
     }
 }
 
-void Cluster::updateCluster(vector<vector<char>> &simpleMap, string takableResource)
+void Cluster::updateCluster(vector<vector<char>> &simpleMap, vector<vector<char>> &unitMap, string takableResource)
 {
     if (takableResource.find(this->type) != string::npos)
         this->takable = 1;
+
+    myUnitCount = 0;
+    opUnitCount = 0;
 
     for (int i = 0; i < cells.size(); i++)
     {
@@ -44,5 +49,14 @@ void Cluster::updateCluster(vector<vector<char>> &simpleMap, string takableResou
             swap(cells[i], cells[cells.size() - 1]);
             cells.pop_back();
         }
+        else if (unitMap[cells[i].first][cells[i].second] == 'm')
+        {
+            myUnitCount++;
+        }
+        else if (unitMap[cells[i].first][cells[i].second] == 'o')
+        {
+            opUnitCount++;
+        }
     }
+
 }

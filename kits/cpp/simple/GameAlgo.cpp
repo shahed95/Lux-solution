@@ -29,7 +29,42 @@ vector<vector<char>> GameAlgo::createSimpleMap(GameMap &gameMap, Player &player,
             simpleMap[citytiles.pos.x][citytiles.pos.y] = 'z';
     }
 
+    for (auto &unit : player.units)
+    {
+        if (!unit.canAct() && simpleMap[unit.pos.x][unit.pos.y] == '.')
+            simpleMap[unit.pos.x][unit.pos.y] = 'b';
+    }
+
+    for (auto &unit : opponent.units)
+    {
+        if (!unit.canAct() && simpleMap[unit.pos.x][unit.pos.y] == '.')
+            simpleMap[unit.pos.x][unit.pos.y] = 'b';
+    }
+
     return simpleMap;
+}
+
+
+vector<vector<char>> GameAlgo::createUnitMap(GameMap &gameMap, Player &player, Player &opponent)
+{
+    vector<vector<char>> unitMap;
+    for (int i = 0; i < gameMap.height; i++)
+    {
+        vector<char> temp(gameMap.width, '.');
+        unitMap.push_back(temp);
+    }
+
+    for(auto u: player.units)
+    {
+        unitMap[u.pos.x][u.pos.y] = 'm';
+    }
+
+    for(auto u: opponent.units)
+    {
+        unitMap[u.pos.x][u.pos.y] = 'o';
+    }
+
+    return unitMap;
 }
 
 char GameAlgo::getCell(int x, int y, vector<vector<char>> &simpleMap)
@@ -168,8 +203,9 @@ pair<int, int> GameAlgo::getPosition(int x, int y, DIRECTIONS d)
     }
 }
 
-vector<vector<int>> GameAlgo::makeDistfromCities(vector<vector<char>> &simpleMap)
+vector<vector<int>> GameAlgo::makeDistfromCities(vector<vector<char>> &simpleMap, bool isOpponent)
 {
+    if (isOpponent) return createDistanceArray("z", "yb", simpleMap);
     return createDistanceArray("y", "zb", simpleMap);
 }
 

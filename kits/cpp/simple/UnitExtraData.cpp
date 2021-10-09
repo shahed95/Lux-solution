@@ -43,11 +43,18 @@ void UnitExtraData::updateUnitExtraData(Player &player)
 
         vector<int> order;
         int dayLeft = 30 - (g->gameState.turn % 40);
+        int safeDist = (dayLeft / 2) - 6;
 
-        order = closestClusterOrder(unit.pos.x, unit.pos.y, (dayLeft / 2) - 6);
+        if (g->gameState.turn < 50 && g->distfromOpponent[unit.pos.x][unit.pos.y] <= (safeDist))
+        {
+            unit.TransitionTo(new OppositionAttackState());
+            continue;
+        }
+
+        order = closestClusterOrder(unit.pos.x, unit.pos.y, safeDist);
 
         if (i % 2 == 1 && g->player.cityTileCount > g->opponent.cityTileCount)
-            order = largestClusterOrder(unit.pos.x, unit.pos.y, (dayLeft / 2) - 6);
+            order = largestClusterOrder(unit.pos.x, unit.pos.y, safeDist);
 
         for (auto best : order)
         {
